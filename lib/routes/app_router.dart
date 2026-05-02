@@ -2,6 +2,9 @@ import 'package:go_router/go_router.dart';
 import '../screens/auth/splash_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/profile/profile_screen.dart';
+import '../screens/employee/employees_screen.dart';
+import '../screens/employee/add_edit_employee_screen.dart';
+import '../screens/employee/employee_detail_screen.dart';
 
 class AppRouter {
   static const splash = '/';
@@ -30,6 +33,9 @@ class AppRouter {
   static const privacy = '/privacy';
   static const feedback = '/feedback';
   static const monthlyTarget = '/monthly-target';
+  
+  static const addEditEmployee = '/add-edit-employee';
+  static const employeeDetail = '/employee-detail';
 
   static final router = GoRouter(
     initialLocation: splash,
@@ -39,6 +45,22 @@ class AppRouter {
       GoRoute(
         path: profile,
         builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: employeeManagement,
+        builder: (context, state) => const EmployeesScreen(),
+      ),
+      GoRoute(
+        path: addEditEmployee,
+        builder: (context, state) => const AddEditEmployeeScreen(),
+      ),
+      GoRoute(
+        path: '$addEditEmployee/:id',
+        builder: (context, state) => AddEditEmployeeScreen(id: state.pathParameters['id']),
+      ),
+      GoRoute(
+        path: '$employeeDetail/:id',
+        builder: (context, state) => EmployeeDetailScreen(id: state.pathParameters['id']!),
       ),
     ],
   );
