@@ -13,6 +13,8 @@ import '../screens/attendance/attendance_screen.dart';
 import '../screens/routine/routine_screen.dart';
 import '../screens/routine/routine_detail_screen.dart';
 import '../screens/routine/create_routine_screen.dart';
+import '../screens/expense/expense_screen.dart';
+import '../screens/expense/expense_detail_screen.dart';
 
 class AppRouter {
   static const splash = '/';
@@ -50,6 +52,8 @@ class AppRouter {
   
   static const createRoutine = '/create-routine';
   static const routineDetail = '/routine-detail';
+  
+  static const expenseDetail = '/expense-detail';
 
   static final router = GoRouter(
     initialLocation: splash,
@@ -111,6 +115,14 @@ class AppRouter {
       GoRoute(
         path: '$createRoutine/:id',
         builder: (context, state) => CreateRoutineScreen(employeeId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: expense,
+        builder: (context, state) => const ExpenseScreen(),
+      ),
+      GoRoute(
+        path: '$expenseDetail/:id',
+        builder: (context, state) => ExpenseDetailScreen(id: state.pathParameters['id']!),
       ),
     ],
   );
