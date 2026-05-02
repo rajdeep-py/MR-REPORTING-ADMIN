@@ -10,6 +10,9 @@ import '../screens/team/team_details_screen.dart';
 import '../screens/team/create_edit_team_screen.dart';
 import '../screens/notification/notification_screen.dart';
 import '../screens/attendance/attendance_screen.dart';
+import '../screens/routine/routine_screen.dart';
+import '../screens/routine/routine_detail_screen.dart';
+import '../screens/routine/create_routine_screen.dart';
 
 class AppRouter {
   static const splash = '/';
@@ -44,6 +47,9 @@ class AppRouter {
   
   static const createEditTeam = '/create-edit-team';
   static const teamDetails = '/team-details';
+  
+  static const createRoutine = '/create-routine';
+  static const routineDetail = '/routine-detail';
 
   static final router = GoRouter(
     initialLocation: splash,
@@ -93,6 +99,18 @@ class AppRouter {
       GoRoute(
         path: notifications,
         builder: (context, state) => const NotificationScreen(),
+      ),
+      GoRoute(
+        path: routine,
+        builder: (context, state) => const RoutineScreen(),
+      ),
+      GoRoute(
+        path: '$routineDetail/:id',
+        builder: (context, state) => RoutineDetailScreen(id: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '$createRoutine/:id',
+        builder: (context, state) => CreateRoutineScreen(employeeId: state.pathParameters['id']!),
       ),
     ],
   );
