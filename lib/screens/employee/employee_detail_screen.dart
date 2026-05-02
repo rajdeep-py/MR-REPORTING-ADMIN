@@ -141,12 +141,6 @@ class EmployeeDetailScreen extends ConsumerWidget {
                   onPressed: () => context.push('${AppRouter.addEditEmployee}/${employee.id}'),
                   icon: const Icon(Iconsax.edit_2, size: 18),
                   label: const Text('Edit Profile'),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    side: const BorderSide(color: AppColors.black),
-                    foregroundColor: AppColors.black,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
                 ),
               ),
               AppGaps.mediumH,
@@ -322,11 +316,6 @@ class EmployeeDetailScreen extends ConsumerWidget {
             child: const Text('Cancel', style: TextStyle(color: AppColors.darkGrey)),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-              minimumSize: Size.zero,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
             onPressed: () {
               ref.read(employeeProvider.notifier).deleteEmployee(id);
               Navigator.pop(context);

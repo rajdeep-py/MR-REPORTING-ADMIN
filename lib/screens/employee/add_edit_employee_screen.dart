@@ -344,12 +344,6 @@ class _AddEditEmployeeScreenState extends ConsumerState<AddEditEmployeeScreen> {
         Expanded(
           child: OutlinedButton(
             onPressed: () => context.pop(),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              side: const BorderSide(color: AppColors.lightGrey),
-              foregroundColor: AppColors.darkGrey,
-            ),
             child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w600)),
           ),
         ),
@@ -358,9 +352,6 @@ class _AddEditEmployeeScreenState extends ConsumerState<AddEditEmployeeScreen> {
           flex: 2,
           child: ElevatedButton(
             onPressed: isLoading ? null : _save,
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 20),
-            ),
             child: isLoading
                 ? const SizedBox(
                     height: 24,

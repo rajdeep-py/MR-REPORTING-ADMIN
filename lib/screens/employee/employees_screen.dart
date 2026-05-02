@@ -29,10 +29,6 @@ class EmployeesScreen extends ConsumerWidget {
             },
             icon: const Icon(Iconsax.add, size: 18),
             label: const Text('Onboard Employee'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              minimumSize: Size.zero,
-            ),
           ),
         ],
       ),

@@ -318,9 +318,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           width: isDesktop ? 200 : double.infinity,
                           child: ElevatedButton(
                             onPressed: isLoading ? null : _handleUpdate,
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 20),
-                            ),
                             child: isLoading
                                 ? const SizedBox(
                                     height: 24,
