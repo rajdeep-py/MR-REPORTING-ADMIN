@@ -9,6 +9,7 @@ import '../screens/team/teams_screen.dart';
 import '../screens/team/team_details_screen.dart';
 import '../screens/team/create_edit_team_screen.dart';
 import '../screens/notification/notification_screen.dart';
+import '../screens/attendance/attendance_screen.dart';
 
 class AppRouter {
   static const splash = '/';
@@ -56,6 +57,10 @@ class AppRouter {
       GoRoute(
         path: employeeManagement,
         builder: (context, state) => const EmployeesScreen(),
+      ),
+      GoRoute(
+        path: attendance,
+        builder: (context, state) => const AttendanceScreen(),
       ),
       GoRoute(
         path: addEditEmployee,
