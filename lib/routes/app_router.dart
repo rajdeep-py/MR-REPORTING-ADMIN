@@ -22,6 +22,8 @@ import '../screens/terms_conditions/terms_conditions_screen.dart';
 import '../screens/feedback/feedback_screen.dart';
 import '../screens/announcement/announcement_screen.dart';
 import '../screens/visual_ads/visual_ads_screen.dart';
+import '../screens/doctor/doctors_screen.dart';
+import '../screens/doctor/doctor_detail_screen.dart';
 
 class AppRouter {
   static const splash = '/';
@@ -61,6 +63,7 @@ class AppRouter {
   static const routineDetail = '/routine-detail';
   
   static const expenseDetail = '/expense-detail';
+  static const doctorDetail = '/doctor-detail';
 
   static final router = GoRouter(
     initialLocation: splash,
@@ -158,6 +161,14 @@ class AppRouter {
       GoRoute(
         path: visualAds,
         builder: (context, state) => const VisualAdsScreen(),
+      ),
+      GoRoute(
+        path: doctorConnections,
+        builder: (context, state) => const DoctorsScreen(),
+      ),
+      GoRoute(
+        path: '$doctorDetail/:id',
+        builder: (context, state) => DoctorDetailScreen(id: state.pathParameters['id']!),
       ),
     ],
   );
