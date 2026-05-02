@@ -15,6 +15,10 @@ import '../screens/routine/routine_detail_screen.dart';
 import '../screens/routine/create_routine_screen.dart';
 import '../screens/expense/expense_screen.dart';
 import '../screens/expense/expense_detail_screen.dart';
+import '../screens/about_us/about_us_screen.dart';
+import '../screens/help_center/help_center_screen.dart';
+import '../screens/privacy_policy/privacy_policy_screen.dart';
+import '../screens/terms_conditions/terms_conditions_screen.dart';
 
 class AppRouter {
   static const splash = '/';
@@ -123,6 +127,22 @@ class AppRouter {
       GoRoute(
         path: '$expenseDetail/:id',
         builder: (context, state) => ExpenseDetailScreen(id: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: aboutUs,
+        builder: (context, state) => const AboutUsScreen(),
+      ),
+      GoRoute(
+        path: helpCenter,
+        builder: (context, state) => const HelpCenterScreen(),
+      ),
+      GoRoute(
+        path: privacy,
+        builder: (context, state) => const PrivacyPolicyScreen(),
+      ),
+      GoRoute(
+        path: terms,
+        builder: (context, state) => const TermsConditionsScreen(),
       ),
     ],
   );
