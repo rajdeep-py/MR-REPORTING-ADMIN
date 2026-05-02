@@ -28,6 +28,8 @@ import '../screens/chemist_shop/chemist_shops_screen.dart';
 import '../screens/chemist_shop/chemist_shop_detail_screen.dart';
 import '../screens/stockist/stockists_screen.dart';
 import '../screens/stockist/stockist_detail_screen.dart';
+import '../screens/dcr/dcr_screen.dart';
+import '../screens/dcr/dcr_details_screen.dart';
 
 class AppRouter {
   static const splash = '/';
@@ -70,6 +72,7 @@ class AppRouter {
   static const doctorDetail = '/doctor-detail';
   static const chemistDetail = '/chemist-detail';
   static const stockistDetail = '/stockist-detail';
+  static const dcrDetail = '/dcr-detail';
 
   static final router = GoRouter(
     initialLocation: splash,
@@ -191,6 +194,14 @@ class AppRouter {
       GoRoute(
         path: '$stockistDetail/:id',
         builder: (context, state) => StockistDetailScreen(id: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: dcr,
+        builder: (context, state) => const DcrScreen(),
+      ),
+      GoRoute(
+        path: '$dcrDetail/:id',
+        builder: (context, state) => DcrDetailsScreen(id: state.pathParameters['id']!),
       ),
     ],
   );
