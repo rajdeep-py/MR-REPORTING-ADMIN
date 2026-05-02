@@ -5,6 +5,10 @@ import '../screens/profile/profile_screen.dart';
 import '../screens/employee/employees_screen.dart';
 import '../screens/employee/add_edit_employee_screen.dart';
 import '../screens/employee/employee_detail_screen.dart';
+import '../screens/team/teams_screen.dart';
+import '../screens/team/team_details_screen.dart';
+import '../screens/team/create_edit_team_screen.dart';
+import '../screens/notification/notification_screen.dart';
 
 class AppRouter {
   static const splash = '/';
@@ -36,6 +40,9 @@ class AppRouter {
   
   static const addEditEmployee = '/add-edit-employee';
   static const employeeDetail = '/employee-detail';
+  
+  static const createEditTeam = '/create-edit-team';
+  static const teamDetails = '/team-details';
 
   static final router = GoRouter(
     initialLocation: splash,
@@ -61,6 +68,26 @@ class AppRouter {
       GoRoute(
         path: '$employeeDetail/:id',
         builder: (context, state) => EmployeeDetailScreen(id: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: teamManagement,
+        builder: (context, state) => const TeamsScreen(),
+      ),
+      GoRoute(
+        path: createEditTeam,
+        builder: (context, state) => const CreateEditTeamScreen(),
+      ),
+      GoRoute(
+        path: '$createEditTeam/:id',
+        builder: (context, state) => CreateEditTeamScreen(id: state.pathParameters['id']),
+      ),
+      GoRoute(
+        path: '$teamDetails/:id',
+        builder: (context, state) => TeamDetailsScreen(id: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: notifications,
+        builder: (context, state) => const NotificationScreen(),
       ),
     ],
   );
