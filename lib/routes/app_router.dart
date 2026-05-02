@@ -20,6 +20,7 @@ import '../screens/help_center/help_center_screen.dart';
 import '../screens/privacy_policy/privacy_policy_screen.dart';
 import '../screens/terms_conditions/terms_conditions_screen.dart';
 import '../screens/feedback/feedback_screen.dart';
+import '../screens/announcement/announcement_screen.dart';
 
 class AppRouter {
   static const splash = '/';
@@ -148,6 +149,10 @@ class AppRouter {
       GoRoute(
         path: feedback,
         builder: (context, state) => const FeedbackScreen(),
+      ),
+      GoRoute(
+        path: announcements,
+        builder: (context, state) => const AnnouncementScreen(),
       ),
     ],
   );
