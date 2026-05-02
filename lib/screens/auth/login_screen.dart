@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:animate_do/animate_do.dart';
+import '../../routes/app_router.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../cards/auth/support_bottomsheet.dart';
@@ -48,6 +50,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           context: context,
           message: 'Welcome back, ${authState.value!.name}!',
         );
+        context.go(AppRouter.profile);
       }
     }
   }
