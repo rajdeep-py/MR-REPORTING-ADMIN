@@ -142,6 +142,15 @@ class RoutineDetailsCard extends ConsumerWidget {
             ),
           ),
           IconButton(
+            icon: const Icon(Iconsax.edit_2, size: 18),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (_) => _EditTaskDialog(routineId: routineId, task: task, ref: ref),
+              );
+            },
+          ),
+          IconButton(
             icon: const Icon(Iconsax.trash, size: 18, color: AppColors.error),
             onPressed: () {
               ref.read(routineProvider.notifier).deleteTask(routineId, task.id);
@@ -152,3 +161,116 @@ class RoutineDetailsCard extends ConsumerWidget {
     );
   }
 }
+
+class _EditTaskDialog extends StatefulWidget {
+  final String routineId;
+  final RoutineTask task;
+  final WidgetRef ref;
+
+  const _EditTaskDialog({required this.routineId, required this.task, required this.ref});
+
+  @override
+  State<_EditTaskDialog> createState() => _EditTaskDialogState();
+}
+
+class _EditTaskDialogState extends State<_EditTaskDialog> {
+  late TextEditingController _titleCtrl;
+  late TextEditingController _descCtrl;
+  late String _timeStr;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleCtrl = TextEditingController(text: widget.task.title);
+    _descCtrl = TextEditingController(text: widget.task.description);
+    _timeStr = widget.task.time;
+  }
+
+  @override
+  void dispose() {
+    _titleCtrl.dispose();
+    _descCtrl.dispose();
+    super.dispose();
+  }
+
+  void _pickTime() async {
+    final now = TimeOfDay.now();
+    final initialTime = TimeOfDay(
+      hour: int.tryParse(_timeStr.split(':')[0]) ?? now.hour,
+      minute: int.tryParse(_timeStr.split(':')[1].split(' ')[0]) ?? now.minute,
+    );
+    
+    final time = await showTimePicker(context: context, initialTime: initialTime);
+    if (time != null && mounted) {
+      setState(() {
+        _timeStr = time.format(context);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: AppColors.background,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      title: const Text('Edit Task', style: TextStyle(fontWeight: FontWeight.w700)),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: _titleCtrl,
+              decoration: const InputDecoration(labelText: 'Task Title', prefixIcon: Icon(Iconsax.task_square)),
+            ),
+            AppGaps.mediumV,
+            TextField(
+              controller: _descCtrl,
+              maxLines: 2,
+              decoration: const InputDecoration(labelText: 'Task Description', prefixIcon: Icon(Iconsax.text_block)),
+            ),
+            AppGaps.mediumV,
+            InkWell(
+              onTap: _pickTime,
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.surface, 
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.lightGrey),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Iconsax.clock, size: 18),
+                    const SizedBox(width: 8),
+                    Text(_timeStr, style: const TextStyle(fontWeight: FontWeight.w600)),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel', style: TextStyle(color: AppColors.darkGrey)),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            final updated = widget.task.copyWith(
+              title: _titleCtrl.text,
+              description: _descCtrl.text,
+              time: _timeStr,
+            );
+            widget.ref.read(routineProvider.notifier).updateTask(widget.routineId, updated);
+            Navigator.of(context).pop();
+          },
+          child: const Text('Save Changes'),
+        ),
+      ],
+    );
+  }
+}
+
