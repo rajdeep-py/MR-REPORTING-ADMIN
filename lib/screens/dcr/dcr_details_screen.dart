@@ -17,7 +17,7 @@ class DcrDetailsScreen extends ConsumerWidget {
   const DcrDetailsScreen({super.key, required this.id});
 
   Color _getStatusColor(String status) {
-    switch (status) {
+    switch (status.toLowerCase()) {
       case 'completed':
         return Colors.green;
       case 'pending':
@@ -29,16 +29,26 @@ class DcrDetailsScreen extends ConsumerWidget {
     }
   }
 
-  Widget _buildDcrInfoBlock(Dcr dcr) {
+  Widget _buildDcrHeroBlock(Dcr dcr, BuildContext context) {
     final statusColor = _getStatusColor(dcr.status);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 24),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        gradient: const LinearGradient(
+          colors: [AppColors.black, Color(0xFF2A2A2A)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.lightGrey.withAlpha(128)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.black.withAlpha(50),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,32 +56,89 @@ class DcrDetailsScreen extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(dcr.id, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: statusColor.withAlpha(25),
+                  color: Colors.white.withAlpha(25),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: statusColor.withAlpha(50)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Iconsax.receipt_2, color: Colors.white, size: 16),
+                    const SizedBox(width: 8),
+                    Text(dcr.id, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14)),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: statusColor,
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   dcr.status.toUpperCase(),
-                  style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 10),
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 12, letterSpacing: 0.5),
                 ),
               ),
             ],
           ),
-          AppGaps.largeV,
+          AppGaps.extraLargeV,
           Row(
             children: [
-              const Icon(Iconsax.calendar_1, size: 16, color: AppColors.darkGrey),
-              const SizedBox(width: 8),
-              Text(DateFormat('MMMM dd, yyyy').format(dcr.date), style: const TextStyle(color: AppColors.darkGrey, fontSize: 14)),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Date', style: TextStyle(color: AppColors.midGrey, fontSize: 13, fontWeight: FontWeight.w500)),
+                    const SizedBox(height: 4),
+                    Text(DateFormat('MMMM dd, yyyy').format(dcr.date), style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+                  ],
+                ),
+              ),
+              Container(width: 1, height: 40, color: Colors.white.withAlpha(50)),
               const SizedBox(width: 24),
-              const Icon(Iconsax.clock, size: 16, color: AppColors.darkGrey),
-              const SizedBox(width: 8),
-              Text(dcr.time, style: const TextStyle(color: AppColors.darkGrey, fontSize: 14)),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Time', style: TextStyle(color: AppColors.midGrey, fontSize: 13, fontWeight: FontWeight.w500)),
+                    const SizedBox(height: 4),
+                    Text(dcr.time, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+                  ],
+                ),
+              ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String title, String value, {Color iconColor = AppColors.black}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(icon, color: iconColor, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(color: AppColors.darkGrey, fontSize: 13, fontWeight: FontWeight.w500)),
+                const SizedBox(height: 4),
+                Text(value, style: const TextStyle(color: AppColors.black, fontSize: 16, fontWeight: FontWeight.w700, height: 1.4)),
+              ],
+            ),
           ),
         ],
       ),
@@ -80,7 +147,7 @@ class DcrDetailsScreen extends ConsumerWidget {
 
   Widget _buildDoctorInfoBlock(Dcr dcr) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 24),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -90,34 +157,12 @@ class DcrDetailsScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Icon(Iconsax.health, color: AppColors.black, size: 20),
-              AppGaps.mediumH,
-              const Text('Doctor Details', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
-            ],
-          ),
+          const Text('Doctor Details', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, letterSpacing: -0.5)),
           AppGaps.largeV,
-          Text(dcr.doctorName, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-          const SizedBox(height: 4),
-          Text(dcr.doctorSpecialization, style: const TextStyle(color: AppColors.darkGrey, fontWeight: FontWeight.w600, fontSize: 14)),
-          AppGaps.largeV,
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Icon(Iconsax.location, size: 14, color: AppColors.darkGrey),
-              const SizedBox(width: 8),
-              Expanded(child: Text(dcr.placeOfAppointment, style: const TextStyle(color: AppColors.darkGrey, fontSize: 14, height: 1.5))),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              const Icon(Iconsax.call, size: 14, color: AppColors.darkGrey),
-              const SizedBox(width: 8),
-              Text(dcr.doctorPhoneNo, style: const TextStyle(color: AppColors.darkGrey, fontSize: 14)),
-            ],
-          ),
+          _buildInfoRow(Iconsax.health, 'Doctor Name', dcr.doctorName, iconColor: AppColors.black),
+          _buildInfoRow(Iconsax.verify, 'Specialization', dcr.doctorSpecialization),
+          _buildInfoRow(Iconsax.location, 'Appointment Location', dcr.placeOfAppointment),
+          _buildInfoRow(Iconsax.call, 'Contact Number', dcr.doctorPhoneNo),
         ],
       ),
     );
@@ -125,7 +170,7 @@ class DcrDetailsScreen extends ConsumerWidget {
 
   Widget _buildEmployeeInfoBlock(Employee employee) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 24),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -135,38 +180,61 @@ class DcrDetailsScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Icon(Iconsax.user, color: AppColors.black, size: 20),
-              AppGaps.mediumH,
-              const Text('Medical Representative', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
-            ],
-          ),
+          const Text('Assigned Representative', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, letterSpacing: -0.5)),
           AppGaps.largeV,
           Row(
             children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundImage: employee.profilePhotoPath != null ? NetworkImage(employee.profilePhotoPath!) : null,
-                backgroundColor: AppColors.surface,
-                child: employee.profilePhotoPath == null ? const Icon(Iconsax.user, color: AppColors.black) : null,
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  image: employee.profilePhotoPath != null ? DecorationImage(
+                    image: NetworkImage(employee.profilePhotoPath!),
+                    fit: BoxFit.cover,
+                  ) : null,
+                ),
+                child: employee.profilePhotoPath == null ? const Icon(Iconsax.user, color: AppColors.black, size: 24) : null,
               ),
-              AppGaps.mediumH,
+              const SizedBox(width: 20),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(employee.fullName, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-                    const SizedBox(height: 4),
+                    Text(employee.fullName, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
+                    const SizedBox(height: 6),
                     Row(
                       children: [
-                        const Icon(Iconsax.location, size: 12, color: AppColors.darkGrey),
-                        const SizedBox(width: 4),
-                        Text(employee.headquarter, style: const TextStyle(color: AppColors.darkGrey, fontSize: 12)),
-                        const SizedBox(width: 12),
-                        const Icon(Iconsax.call, size: 12, color: AppColors.darkGrey),
-                        const SizedBox(width: 4),
-                        Text(employee.phoneNo, style: const TextStyle(color: AppColors.darkGrey, fontSize: 12)),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Iconsax.location, size: 12, color: AppColors.darkGrey),
+                              const SizedBox(width: 4),
+                              Text(employee.headquarter, style: const TextStyle(color: AppColors.darkGrey, fontSize: 12, fontWeight: FontWeight.w600)),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Iconsax.call, size: 12, color: AppColors.darkGrey),
+                              const SizedBox(width: 4),
+                              Text(employee.phoneNo, style: const TextStyle(color: AppColors.darkGrey, fontSize: 12, fontWeight: FontWeight.w600)),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -195,48 +263,83 @@ class DcrDetailsScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Icon(Iconsax.monitor, color: AppColors.black, size: 20),
-              AppGaps.mediumH,
-              const Text('Visual Ads Presented', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
+              const Text('Visual Ads Presented', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, letterSpacing: -0.5)),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text('${presentedAds.length} Items', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
+              ),
             ],
           ),
           AppGaps.largeV,
           if (presentedAds.isEmpty)
-            const Text('No visual ads were presented during this visit.', style: TextStyle(color: AppColors.darkGrey))
-          else
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: presentedAds.map((ad) => Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.lightGrey),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.lightGrey, style: BorderStyle.solid),
+              ),
+              child: const Center(
+                child: Column(
                   children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        image: DecorationImage(
-                          image: ad.imagePath.startsWith('http')
-                              ? NetworkImage(ad.imagePath) as ImageProvider
-                              : FileImage(File(ad.imagePath)),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(ad.productName, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                    const SizedBox(width: 8),
+                    Icon(Iconsax.gallery_slash, color: AppColors.midGrey, size: 32),
+                    SizedBox(height: 12),
+                    Text('No visual ads presented', style: TextStyle(color: AppColors.darkGrey, fontWeight: FontWeight.w600)),
                   ],
                 ),
-              )).toList(),
+              ),
+            )
+          else
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: presentedAds.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final ad = presentedAds[index];
+                return Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          image: DecorationImage(
+                            image: ad.imagePath.startsWith('http')
+                                ? NetworkImage(ad.imagePath) as ImageProvider
+                                : FileImage(File(ad.imagePath)),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(ad.productName, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                            const SizedBox(height: 4),
+                            Text('Visual Ad • ID: ${ad.id}', style: const TextStyle(color: AppColors.darkGrey, fontSize: 12)),
+                          ],
+                        ),
+                      ),
+                      const Icon(Iconsax.arrow_right_3, color: AppColors.darkGrey, size: 16),
+                    ],
+                  ),
+                );
+              },
             ),
         ],
       ),
@@ -265,8 +368,8 @@ class DcrDetailsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: PremiumAppBar(
-        title: dcr.id,
-        subtitle: 'Daily Call Report Details',
+        title: 'Report Details',
+        subtitle: 'DCR Tracking & Information',
         showBackButton: true,
         onMenuTap: () => context.pop(),
       ),
@@ -275,10 +378,11 @@ class DcrDetailsScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildDcrInfoBlock(dcr),
+            _buildDcrHeroBlock(dcr, context),
             _buildDoctorInfoBlock(dcr),
             if (employee != null) _buildEmployeeInfoBlock(employee),
             _buildVisualAdsBlock(ref, dcr),
+            const SizedBox(height: 40),
           ],
         ),
       ),
