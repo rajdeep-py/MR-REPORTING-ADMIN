@@ -50,7 +50,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           context: context,
           message: 'Welcome back, ${authState.value!.name}!',
         );
-        context.go(AppRouter.profile);
+        context.go(AppRouter.dashboard);
       }
     }
   }

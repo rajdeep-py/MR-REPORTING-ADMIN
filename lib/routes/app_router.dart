@@ -36,6 +36,7 @@ import '../screens/order/orders_screen.dart';
 import '../screens/order/order_details_screen.dart';
 import '../screens/gift/gift_screen.dart';
 import '../screens/gift/gift_inventory_screen.dart';
+import '../screens/dashboard/dashboard_screen.dart';
 
 class AppRouter {
   static const splash = '/';
@@ -89,6 +90,10 @@ class AppRouter {
     routes: [
       GoRoute(path: splash, builder: (context, state) => const SplashScreen()),
       GoRoute(path: login, builder: (context, state) => const LoginScreen()),
+      GoRoute(
+        path: dashboard,
+        builder: (context, state) => const DashboardScreen(),
+      ),
       GoRoute(
         path: profile,
         builder: (context, state) => const ProfileScreen(),
