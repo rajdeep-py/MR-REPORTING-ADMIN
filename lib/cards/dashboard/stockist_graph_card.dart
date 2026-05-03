@@ -19,9 +19,27 @@ class StockistGraphCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Stockists Onboarded', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-          const SizedBox(height: 4),
-          const Text('Total onboarded per month', style: TextStyle(color: AppColors.darkGrey, fontSize: 13)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Stockists Onboarded', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 4),
+                  const Text('Total onboarded per month', style: TextStyle(color: AppColors.darkGrey, fontSize: 13)),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF10B981).withAlpha(20),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text('Growth', style: TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.bold, fontSize: 12)),
+              ),
+            ],
+          ),
           const SizedBox(height: 32),
           SizedBox(
             height: 250,
@@ -29,7 +47,18 @@ class StockistGraphCard extends StatelessWidget {
               BarChartData(
                 alignment: BarChartAlignment.spaceAround,
                 maxY: 6,
-                barTouchData: BarTouchData(enabled: false),
+                barTouchData: BarTouchData(
+                  enabled: true,
+                  touchTooltipData: BarTouchTooltipData(
+                    getTooltipColor: (_) => AppColors.black,
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                      return BarTooltipItem(
+                        rod.toY.toInt().toString(),
+                        const TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),
+                      );
+                    },
+                  ),
+                ),
                 titlesData: FlTitlesData(
                   show: true,
                   bottomTitles: AxisTitles(
@@ -39,7 +68,7 @@ class StockistGraphCard extends StatelessWidget {
                         if (value.toInt() >= 0 && value.toInt() < data.length) {
                           return Padding(
                             padding: const EdgeInsets.only(top: 8.0),
-                            child: Text(data[value.toInt()].month, style: const TextStyle(color: AppColors.darkGrey, fontSize: 10, fontWeight: FontWeight.bold)),
+                            child: Text(data[value.toInt()].month, style: const TextStyle(color: AppColors.darkGrey, fontSize: 10, fontWeight: FontWeight.w600)),
                           );
                         }
                         return const Text('');
@@ -61,7 +90,7 @@ class StockistGraphCard extends StatelessWidget {
                   show: true,
                   drawVerticalLine: false,
                   horizontalInterval: 1,
-                  getDrawingHorizontalLine: (value) => FlLine(color: AppColors.lightGrey.withAlpha(100), strokeWidth: 1),
+                  getDrawingHorizontalLine: (value) => FlLine(color: AppColors.lightGrey.withAlpha(100), strokeWidth: 1, dashArray: [5, 5]),
                 ),
                 borderData: FlBorderData(show: false),
                 barGroups: data.asMap().entries.map((e) {
@@ -71,8 +100,13 @@ class StockistGraphCard extends StatelessWidget {
                       BarChartRodData(
                         toY: e.value.count.toDouble(),
                         color: const Color(0xFF10B981),
-                        width: 12,
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                        width: 16,
+                        borderRadius: BorderRadius.circular(8),
+                        backDrawRodData: BackgroundBarChartRodData(
+                          show: true,
+                          toY: 6,
+                          color: AppColors.background,
+                        ),
                       )
                     ],
                   );

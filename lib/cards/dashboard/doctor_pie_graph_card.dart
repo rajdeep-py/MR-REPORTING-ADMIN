@@ -3,9 +3,16 @@ import 'package:fl_chart/fl_chart.dart';
 import '../../theme/app_theme.dart';
 import '../../models/dashboard.dart';
 
-class DoctorPieGraphCard extends StatelessWidget {
+class DoctorPieGraphCard extends StatefulWidget {
   final List<PieData> data;
   const DoctorPieGraphCard({super.key, required this.data});
+
+  @override
+  State<DoctorPieGraphCard> createState() => _DoctorPieGraphCardState();
+}
+
+class _DoctorPieGraphCardState extends State<DoctorPieGraphCard> {
+  int touchedIndex = -1;
 
   @override
   Widget build(BuildContext context) {
@@ -30,15 +37,36 @@ class DoctorPieGraphCard extends StatelessWidget {
                 Expanded(
                   child: PieChart(
                     PieChartData(
-                      sectionsSpace: 2,
-                      centerSpaceRadius: 40,
-                      sections: data.map((e) {
+                      pieTouchData: PieTouchData(
+                        touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                          setState(() {
+                            if (!event.isInterestedForInteractions || pieTouchResponse == null || pieTouchResponse.touchedSection == null) {
+                              touchedIndex = -1;
+                              return;
+                            }
+                            touchedIndex = pieTouchResponse.touchedSection!.touchedSectionIndex;
+                          });
+                        },
+                      ),
+                      borderData: FlBorderData(show: false),
+                      sectionsSpace: 4,
+                      centerSpaceRadius: 50,
+                      sections: widget.data.asMap().entries.map((e) {
+                        final isTouched = e.key == touchedIndex;
+                        final double fontSize = isTouched ? 16 : 12;
+                        final double radius = isTouched ? 60 : 50;
+
                         return PieChartSectionData(
-                          color: Color(e.colorValue),
-                          value: e.count.toDouble(),
-                          title: '${e.count}%',
-                          radius: 50,
-                          titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.white),
+                          color: Color(e.value.colorValue),
+                          value: e.value.count.toDouble(),
+                          title: '${e.value.count}%',
+                          radius: radius,
+                          titleStyle: TextStyle(
+                            fontSize: fontSize,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.white,
+                            shadows: const [Shadow(color: Colors.black26, blurRadius: 2)],
+                          ),
                         );
                       }).toList(),
                     ),
@@ -48,14 +76,14 @@ class DoctorPieGraphCard extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: data.map((e) {
+                    children: widget.data.map((e) {
                       return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        padding: const EdgeInsets.symmetric(vertical: 6.0),
                         child: Row(
                           children: [
-                            Container(width: 12, height: 12, decoration: BoxDecoration(shape: BoxShape.circle, color: Color(e.colorValue))),
-                            const SizedBox(width: 8),
-                            Expanded(child: Text(e.category, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600))),
+                            Container(width: 14, height: 14, decoration: BoxDecoration(shape: BoxShape.circle, color: Color(e.colorValue))),
+                            const SizedBox(width: 10),
+                            Expanded(child: Text(e.category, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600))),
                           ],
                         ),
                       );

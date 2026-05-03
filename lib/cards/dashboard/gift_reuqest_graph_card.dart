@@ -19,9 +19,27 @@ class GiftRequestGraphCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Gift Requests', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-          const SizedBox(height: 4),
-          const Text('Monthly trend of gift requests', style: TextStyle(color: AppColors.darkGrey, fontSize: 13)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Gift Requests', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 4),
+                  const Text('Monthly trend of gift requests', style: TextStyle(color: AppColors.darkGrey, fontSize: 13)),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF8B5CF6).withAlpha(20),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text('Steady', style: TextStyle(color: Color(0xFF8B5CF6), fontWeight: FontWeight.bold, fontSize: 12)),
+              ),
+            ],
+          ),
           const SizedBox(height: 32),
           SizedBox(
             height: 250,
@@ -30,7 +48,7 @@ class GiftRequestGraphCard extends StatelessWidget {
                 gridData: FlGridData(
                   show: true,
                   drawVerticalLine: false,
-                  getDrawingHorizontalLine: (value) => FlLine(color: AppColors.lightGrey.withAlpha(100), strokeWidth: 1),
+                  getDrawingHorizontalLine: (value) => FlLine(color: AppColors.lightGrey.withAlpha(100), strokeWidth: 1, dashArray: [5, 5]),
                 ),
                 titlesData: FlTitlesData(
                   show: true,
@@ -41,7 +59,7 @@ class GiftRequestGraphCard extends StatelessWidget {
                         if (value.toInt() >= 0 && value.toInt() < data.length) {
                           return Padding(
                             padding: const EdgeInsets.only(top: 8.0),
-                            child: Text(data[value.toInt()].month, style: const TextStyle(color: AppColors.darkGrey, fontSize: 10, fontWeight: FontWeight.bold)),
+                            child: Text(data[value.toInt()].month, style: const TextStyle(color: AppColors.darkGrey, fontSize: 10, fontWeight: FontWeight.w600)),
                           );
                         }
                         return const Text('');
@@ -64,17 +82,45 @@ class GiftRequestGraphCard extends StatelessWidget {
                 maxX: (data.length - 1).toDouble(),
                 minY: 0,
                 maxY: 50,
+                lineTouchData: LineTouchData(
+                  handleBuiltInTouches: true,
+                  touchTooltipData: LineTouchTooltipData(
+                    getTooltipColor: (touchedSpot) => AppColors.black,
+                    getTooltipItems: (touchedSpots) {
+                      return touchedSpots.map((spot) => LineTooltipItem(
+                        spot.y.toInt().toString(),
+                        const TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),
+                      )).toList();
+                    },
+                  ),
+                ),
                 lineBarsData: [
                   LineChartBarData(
                     spots: data.asMap().entries.map((e) => FlSpot(e.key.toDouble(), e.value.count.toDouble())).toList(),
                     isCurved: true,
+                    curveSmoothness: 0.35,
                     color: const Color(0xFF8B5CF6),
                     barWidth: 4,
                     isStrokeCapRound: true,
-                    dotData: const FlDotData(show: false),
+                    dotData: FlDotData(
+                      show: true,
+                      getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(
+                        radius: 4,
+                        color: AppColors.white,
+                        strokeWidth: 3,
+                        strokeColor: const Color(0xFF8B5CF6),
+                      ),
+                    ),
                     belowBarData: BarAreaData(
                       show: true,
-                      color: const Color(0xFF8B5CF6).withAlpha(30),
+                      gradient: LinearGradient(
+                        colors: [
+                          const Color(0xFF8B5CF6).withAlpha(80),
+                          const Color(0xFF8B5CF6).withAlpha(0),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
                     ),
                   ),
                 ],

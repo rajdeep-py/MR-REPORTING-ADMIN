@@ -39,7 +39,19 @@ class AttendanceGraphCard extends StatelessWidget {
               BarChartData(
                 alignment: BarChartAlignment.spaceAround,
                 maxY: 60,
-                barTouchData: BarTouchData(enabled: false),
+                barTouchData: BarTouchData(
+                  enabled: true,
+                  touchTooltipData: BarTouchTooltipData(
+                    getTooltipColor: (_) => AppColors.black,
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                      final item = data[group.x];
+                      return BarTooltipItem(
+                        'Present: ${item.present}\nAbsent: ${item.absent}',
+                        const TextStyle(color: AppColors.white, fontWeight: FontWeight.w600, fontSize: 12),
+                      );
+                    },
+                  ),
+                ),
                 titlesData: FlTitlesData(
                   show: true,
                   bottomTitles: AxisTitles(
@@ -49,7 +61,7 @@ class AttendanceGraphCard extends StatelessWidget {
                         if (value.toInt() >= 0 && value.toInt() < data.length) {
                           return Padding(
                             padding: const EdgeInsets.only(top: 8.0),
-                            child: Text(data[value.toInt()].month, style: const TextStyle(color: AppColors.darkGrey, fontSize: 10, fontWeight: FontWeight.bold)),
+                            child: Text(data[value.toInt()].month, style: const TextStyle(color: AppColors.darkGrey, fontSize: 10, fontWeight: FontWeight.w600)),
                           );
                         }
                         return const Text('');
@@ -71,7 +83,7 @@ class AttendanceGraphCard extends StatelessWidget {
                   show: true,
                   drawVerticalLine: false,
                   horizontalInterval: 15,
-                  getDrawingHorizontalLine: (value) => FlLine(color: AppColors.lightGrey.withAlpha(100), strokeWidth: 1),
+                  getDrawingHorizontalLine: (value) => FlLine(color: AppColors.lightGrey.withAlpha(100), strokeWidth: 1, dashArray: [5, 5]),
                 ),
                 borderData: FlBorderData(show: false),
                 barGroups: data.asMap().entries.map((e) {
@@ -80,8 +92,8 @@ class AttendanceGraphCard extends StatelessWidget {
                     barRods: [
                       BarChartRodData(
                         toY: (e.value.present + e.value.absent).toDouble(),
-                        width: 12,
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                        width: 16,
+                        borderRadius: BorderRadius.circular(8),
                         rodStackItems: [
                           BarChartRodStackItem(0, e.value.present.toDouble(), const Color(0xFF10B981)),
                           BarChartRodStackItem(e.value.present.toDouble(), (e.value.present + e.value.absent).toDouble(), const Color(0xFFEF4444)),
