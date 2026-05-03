@@ -60,7 +60,7 @@ class SideNavBar extends ConsumerWidget {
         NavItem('Expense Tracker', Iconsax.wallet_money, AppRouter.expense),
         NavItem('Gifts Management', Iconsax.gift, AppRouter.gifts),
         NavItem('DCR Management', Iconsax.document_text, AppRouter.dcr),
-        NavItem('Order Management', Iconsax.shopping_cart, AppRouter.dcr),
+        NavItem('Order Management', Iconsax.shopping_cart, AppRouter.orders),
         NavItem(
           'Chemist Shop Reporting',
           Iconsax.shop,
