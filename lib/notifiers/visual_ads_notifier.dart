@@ -32,20 +32,24 @@ class VisualAdsNotifier extends StateNotifier<VisualAdsState> {
 
   void _loadMockData() async {
     await Future.delayed(const Duration(milliseconds: 500));
-    state = state.copyWith(ads: [
-      const VisualAd(
-        id: '1',
-        productName: 'Paracetamol 500mg',
-        imagePath: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80',
-        isActive: true,
-      ),
-      const VisualAd(
-        id: '2',
-        productName: 'Vitamin C Complex',
-        imagePath: 'https://images.unsplash.com/photo-1550572017-edb7993006a8?w=400&q=80',
-        isActive: false,
-      ),
-    ]);
+    state = state.copyWith(
+      ads: [
+        const VisualAd(
+          id: '1',
+          productName: 'Paracetamol 500mg',
+          imagePath:
+              'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80',
+          isActive: true,
+        ),
+        const VisualAd(
+          id: '2',
+          productName: 'Vitamin C Complex',
+          imagePath:
+              'https://images.unsplash.com/photo-1550572017-edb7993006a8?w=400&q=80',
+          isActive: false,
+        ),
+      ],
+    );
   }
 
   void addAd(String productName, String imagePath, bool isActive) {
@@ -58,10 +62,19 @@ class VisualAdsNotifier extends StateNotifier<VisualAdsState> {
     state = state.copyWith(ads: [newAd, ...state.ads]);
   }
 
-  void updateAd(String id, String productName, String imagePath, bool isActive) {
+  void updateAd(
+    String id,
+    String productName,
+    String imagePath,
+    bool isActive,
+  ) {
     final updatedAds = state.ads.map((ad) {
       if (ad.id == id) {
-        return ad.copyWith(productName: productName, imagePath: imagePath, isActive: isActive);
+        return ad.copyWith(
+          productName: productName,
+          imagePath: imagePath,
+          isActive: isActive,
+        );
       }
       return ad;
     }).toList();

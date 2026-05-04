@@ -53,21 +53,44 @@ class RoutineNotifier extends StateNotifier<RoutineState> {
           employeeId: 'EMP001',
           date: DateTime(today.year, today.month, today.day),
           tasks: [
-            RoutineTask(id: 'T1', title: 'Visit Dr. Sharma', description: 'Introduce new cardiovascular product line.', time: '10:00 AM'),
-            RoutineTask(id: 'T2', title: 'Apollo Pharmacy Audit', description: 'Check stock levels and place new orders.', time: '02:30 PM'),
+            RoutineTask(
+              id: 'T1',
+              title: 'Visit Dr. Sharma',
+              description: 'Introduce new cardiovascular product line.',
+              time: '10:00 AM',
+            ),
+            RoutineTask(
+              id: 'T2',
+              title: 'Apollo Pharmacy Audit',
+              description: 'Check stock levels and place new orders.',
+              time: '02:30 PM',
+            ),
           ],
         ),
         Routine(
           id: 'R002',
           employeeId: 'EMP001',
-          date: DateTime(today.year, today.month, today.day).add(const Duration(days: 1)),
+          date: DateTime(
+            today.year,
+            today.month,
+            today.day,
+          ).add(const Duration(days: 1)),
           tasks: [
-            RoutineTask(id: 'T3', title: 'Weekly Reporting', description: 'Compile weekly DCR and submit to manager.', time: '09:00 AM'),
+            RoutineTask(
+              id: 'T3',
+              title: 'Weekly Reporting',
+              description: 'Compile weekly DCR and submit to manager.',
+              time: '09:00 AM',
+            ),
           ],
         ),
       ],
       startDate: DateTime(today.year, today.month, today.day),
-      endDate: DateTime(today.year, today.month, today.day).add(const Duration(days: 7)),
+      endDate: DateTime(
+        today.year,
+        today.month,
+        today.day,
+      ).add(const Duration(days: 7)),
     );
   }
 
@@ -86,7 +109,9 @@ class RoutineNotifier extends StateNotifier<RoutineState> {
   void updateTask(String routineId, RoutineTask updatedTask) {
     final updatedRoutines = state.routines.map((r) {
       if (r.id == routineId) {
-        final updatedTasks = r.tasks.map((t) => t.id == updatedTask.id ? updatedTask : t).toList();
+        final updatedTasks = r.tasks
+            .map((t) => t.id == updatedTask.id ? updatedTask : t)
+            .toList();
         return r.copyWith(tasks: updatedTasks);
       }
       return r;
@@ -95,17 +120,22 @@ class RoutineNotifier extends StateNotifier<RoutineState> {
   }
 
   void deleteTask(String routineId, String taskId) {
-    final updatedRoutines = state.routines.map((r) {
-      if (r.id == routineId) {
-        final updatedTasks = r.tasks.where((t) => t.id != taskId).toList();
-        return r.copyWith(tasks: updatedTasks);
-      }
-      return r;
-    }).where((r) => r.tasks.isNotEmpty).toList(); // Optional: remove routine if empty
+    final updatedRoutines = state.routines
+        .map((r) {
+          if (r.id == routineId) {
+            final updatedTasks = r.tasks.where((t) => t.id != taskId).toList();
+            return r.copyWith(tasks: updatedTasks);
+          }
+          return r;
+        })
+        .where((r) => r.tasks.isNotEmpty)
+        .toList(); // Optional: remove routine if empty
     state = state.copyWith(routines: updatedRoutines);
   }
 
   void deleteRoutine(String routineId) {
-    state = state.copyWith(routines: state.routines.where((r) => r.id != routineId).toList());
+    state = state.copyWith(
+      routines: state.routines.where((r) => r.id != routineId).toList(),
+    );
   }
 }

@@ -13,13 +13,15 @@ class AnnouncementNotifier extends StateNotifier<List<Announcement>> {
       Announcement(
         id: '1',
         title: 'Q3 Townhall Meeting',
-        description: 'All medical representatives are requested to attend the Q3 Townhall meeting next Friday. We will discuss the new product line and revised targets.',
+        description:
+            'All medical representatives are requested to attend the Q3 Townhall meeting next Friday. We will discuss the new product line and revised targets.',
         createdAt: now.subtract(const Duration(days: 2)),
       ),
       Announcement(
         id: '2',
         title: 'New Policy Updates',
-        description: 'Please review the updated expense reimbursement policies uploaded on the portal. These changes will be effective from next month.',
+        description:
+            'Please review the updated expense reimbursement policies uploaded on the portal. These changes will be effective from next month.',
         createdAt: now.subtract(const Duration(days: 5)),
       ),
     ];

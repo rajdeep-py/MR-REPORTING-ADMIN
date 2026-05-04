@@ -55,7 +55,7 @@ class ExpenseNotifier extends StateNotifier<ExpenseState> {
           status: 'Pending',
           attachedImages: [
             'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&q=80',
-            'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=400&q=80'
+            'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=400&q=80',
           ],
           items: [
             const ExpenseItem(id: 'I1', title: 'Travel (Bus)', amount: 150.0),
@@ -65,10 +65,14 @@ class ExpenseNotifier extends StateNotifier<ExpenseState> {
         DailyExpense(
           id: 'E002',
           employeeId: 'EMP001',
-          date: DateTime(today.year, today.month, today.day).subtract(const Duration(days: 1)),
+          date: DateTime(
+            today.year,
+            today.month,
+            today.day,
+          ).subtract(const Duration(days: 1)),
           status: 'Paid',
           attachedImages: [
-            'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=400&q=80'
+            'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=400&q=80',
           ],
           items: [
             const ExpenseItem(id: 'I3', title: 'Hotel Stay', amount: 1200.0),

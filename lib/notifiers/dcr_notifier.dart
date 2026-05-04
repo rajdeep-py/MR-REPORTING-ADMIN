@@ -38,44 +38,46 @@ class DcrNotifier extends StateNotifier<DcrState> {
 
   void _loadMockData() async {
     await Future.delayed(const Duration(milliseconds: 500));
-    state = state.copyWith(dcrs: [
-      Dcr(
-        id: 'DCR-10293',
-        date: DateTime.now().subtract(const Duration(days: 1)),
-        time: '10:30 AM',
-        status: 'completed',
-        doctorName: 'Dr. Sarah Mitchell',
-        doctorSpecialization: 'Cardiologist',
-        placeOfAppointment: 'City Heart Clinic, Mumbai',
-        doctorPhoneNo: '+1 234 567 8901',
-        employeeId: 'EMP001',
-        presentedVisualAdIds: ['1', '2'],
-      ),
-      Dcr(
-        id: 'DCR-10294',
-        date: DateTime.now(),
-        time: '02:00 PM',
-        status: 'pending',
-        doctorName: 'Dr. James Wilson',
-        doctorSpecialization: 'Neurologist',
-        placeOfAppointment: 'NeuroCare Center, Delhi',
-        doctorPhoneNo: '+1 987 654 3210',
-        employeeId: 'EMP002',
-        presentedVisualAdIds: ['2'],
-      ),
-      Dcr(
-        id: 'DCR-10295',
-        date: DateTime.now().add(const Duration(days: 1)),
-        time: '04:15 PM',
-        status: 'cancelled',
-        doctorName: 'Dr. Emily Chen',
-        doctorSpecialization: 'Pediatrician',
-        placeOfAppointment: 'Kids Health Hub',
-        doctorPhoneNo: '+1 555 123 4567',
-        employeeId: 'EMP001',
-        presentedVisualAdIds: [],
-      ),
-    ]);
+    state = state.copyWith(
+      dcrs: [
+        Dcr(
+          id: 'DCR-10293',
+          date: DateTime.now().subtract(const Duration(days: 1)),
+          time: '10:30 AM',
+          status: 'completed',
+          doctorName: 'Dr. Sarah Mitchell',
+          doctorSpecialization: 'Cardiologist',
+          placeOfAppointment: 'City Heart Clinic, Mumbai',
+          doctorPhoneNo: '+1 234 567 8901',
+          employeeId: 'EMP001',
+          presentedVisualAdIds: ['1', '2'],
+        ),
+        Dcr(
+          id: 'DCR-10294',
+          date: DateTime.now(),
+          time: '02:00 PM',
+          status: 'pending',
+          doctorName: 'Dr. James Wilson',
+          doctorSpecialization: 'Neurologist',
+          placeOfAppointment: 'NeuroCare Center, Delhi',
+          doctorPhoneNo: '+1 987 654 3210',
+          employeeId: 'EMP002',
+          presentedVisualAdIds: ['2'],
+        ),
+        Dcr(
+          id: 'DCR-10295',
+          date: DateTime.now().add(const Duration(days: 1)),
+          time: '04:15 PM',
+          status: 'cancelled',
+          doctorName: 'Dr. Emily Chen',
+          doctorSpecialization: 'Pediatrician',
+          placeOfAppointment: 'Kids Health Hub',
+          doctorPhoneNo: '+1 555 123 4567',
+          employeeId: 'EMP001',
+          presentedVisualAdIds: [],
+        ),
+      ],
+    );
   }
 
   void setSearchEmployeeQuery(String query) {

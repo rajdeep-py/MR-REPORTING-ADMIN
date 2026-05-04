@@ -43,7 +43,8 @@ class TeamNotifier extends StateNotifier<TeamState> {
         const Team(
           id: 'T001',
           name: 'Alpha Squad',
-          description: 'Primary medical representative team covering north sector hospitals and clinics.',
+          description:
+              'Primary medical representative team covering north sector hospitals and clinics.',
           memberIds: ['EMP001', 'EMP002'],
         ),
       ],
@@ -53,30 +54,23 @@ class TeamNotifier extends StateNotifier<TeamState> {
   Future<void> addTeam(Team team) async {
     state = state.copyWith(isLoading: true);
     await Future.delayed(const Duration(milliseconds: 500));
-    state = state.copyWith(
-      isLoading: false,
-      teams: [...state.teams, team],
-    );
+    state = state.copyWith(isLoading: false, teams: [...state.teams, team]);
   }
 
   Future<void> updateTeam(Team updatedTeam) async {
     state = state.copyWith(isLoading: true);
     await Future.delayed(const Duration(milliseconds: 500));
-    final newTeams = state.teams.map((t) => t.id == updatedTeam.id ? updatedTeam : t).toList();
-    state = state.copyWith(
-      isLoading: false,
-      teams: newTeams,
-    );
+    final newTeams = state.teams
+        .map((t) => t.id == updatedTeam.id ? updatedTeam : t)
+        .toList();
+    state = state.copyWith(isLoading: false, teams: newTeams);
   }
 
   Future<void> deleteTeam(String id) async {
     state = state.copyWith(isLoading: true);
     await Future.delayed(const Duration(milliseconds: 500));
     final newTeams = state.teams.where((t) => t.id != id).toList();
-    state = state.copyWith(
-      isLoading: false,
-      teams: newTeams,
-    );
+    state = state.copyWith(isLoading: false, teams: newTeams);
   }
 
   void setSearchQuery(String query) {

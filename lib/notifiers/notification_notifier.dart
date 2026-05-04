@@ -35,7 +35,8 @@ class NotificationNotifier extends StateNotifier<NotificationState> {
         AppNotification(
           id: 'N001',
           header: 'New Employee Registration',
-          description: 'Dr. John Doe has successfully registered and requires approval.',
+          description:
+              'Dr. John Doe has successfully registered and requires approval.',
           timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
         ),
         AppNotification(
@@ -48,7 +49,8 @@ class NotificationNotifier extends StateNotifier<NotificationState> {
         AppNotification(
           id: 'N003',
           header: 'System Maintenance',
-          description: 'Server will undergo maintenance at 12:00 AM tonight. Expect 15 mins of downtime.',
+          description:
+              'Server will undergo maintenance at 12:00 AM tonight. Expect 15 mins of downtime.',
           timestamp: DateTime.now().subtract(const Duration(days: 1)),
           isRead: true,
         ),
@@ -65,7 +67,9 @@ class NotificationNotifier extends StateNotifier<NotificationState> {
   }
 
   void markAllAsRead() {
-    final updated = state.notifications.map((n) => n.copyWith(isRead: true)).toList();
+    final updated = state.notifications
+        .map((n) => n.copyWith(isRead: true))
+        .toList();
     state = state.copyWith(notifications: updated);
   }
 }

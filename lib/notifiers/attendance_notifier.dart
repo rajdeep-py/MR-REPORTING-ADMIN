@@ -39,7 +39,7 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
     await Future.delayed(const Duration(milliseconds: 800));
 
     final today = DateTime.now();
-    
+
     state = state.copyWith(
       isLoading: false,
       records: [
@@ -56,15 +56,35 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
         Attendance(
           id: 'A002',
           employeeId: 'EMP001',
-          date: DateTime(today.year, today.month, today.day).subtract(const Duration(days: 1)),
+          date: DateTime(
+            today.year,
+            today.month,
+            today.day,
+          ).subtract(const Duration(days: 1)),
           status: 'Present',
-          checkInTime: DateTime(today.year, today.month, today.day, 9, 0).subtract(const Duration(days: 1)),
-          checkOutTime: DateTime(today.year, today.month, today.day, 18, 0).subtract(const Duration(days: 1)),
+          checkInTime: DateTime(
+            today.year,
+            today.month,
+            today.day,
+            9,
+            0,
+          ).subtract(const Duration(days: 1)),
+          checkOutTime: DateTime(
+            today.year,
+            today.month,
+            today.day,
+            18,
+            0,
+          ).subtract(const Duration(days: 1)),
         ),
         Attendance(
           id: 'A003',
           employeeId: 'EMP001',
-          date: DateTime(today.year, today.month, today.day).subtract(const Duration(days: 2)),
+          date: DateTime(
+            today.year,
+            today.month,
+            today.day,
+          ).subtract(const Duration(days: 2)),
           status: 'Absent',
         ),
         Attendance(
@@ -88,24 +108,27 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
 
   void markAttendance(String status) {
     if (state.selectedEmployeeId == null) return;
-    
-    final existingIndex = state.records.indexWhere((r) => 
-      r.employeeId == state.selectedEmployeeId && 
-      r.date.year == state.selectedDate.year && 
-      r.date.month == state.selectedDate.month && 
-      r.date.day == state.selectedDate.day
+
+    final existingIndex = state.records.indexWhere(
+      (r) =>
+          r.employeeId == state.selectedEmployeeId &&
+          r.date.year == state.selectedDate.year &&
+          r.date.month == state.selectedDate.month &&
+          r.date.day == state.selectedDate.day,
     );
 
     List<Attendance> updated = List.from(state.records);
     if (existingIndex >= 0) {
       updated[existingIndex] = updated[existingIndex].copyWith(status: status);
     } else {
-      updated.add(Attendance(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        employeeId: state.selectedEmployeeId!,
-        date: state.selectedDate,
-        status: status,
-      ));
+      updated.add(
+        Attendance(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          employeeId: state.selectedEmployeeId!,
+          date: state.selectedDate,
+          status: status,
+        ),
+      );
     }
 
     state = state.copyWith(records: updated);

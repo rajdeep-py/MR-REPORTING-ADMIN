@@ -31,37 +31,40 @@ class ChemistShopReportingState {
   }
 }
 
-class ChemistShopReportingNotifier extends StateNotifier<ChemistShopReportingState> {
+class ChemistShopReportingNotifier
+    extends StateNotifier<ChemistShopReportingState> {
   ChemistShopReportingNotifier() : super(ChemistShopReportingState()) {
     _loadMockData();
   }
 
   void _loadMockData() async {
     await Future.delayed(const Duration(milliseconds: 500));
-    state = state.copyWith(reports: [
-      ChemistShopReporting(
-        id: 'CSR-8812',
-        date: DateTime.now().subtract(const Duration(days: 1)),
-        time: '11:00 AM',
-        status: 'completed',
-        chemistShopName: 'HealthPlus Pharmacy',
-        placeOfAppointment: '101 Wellness Blvd, Sector 4, Mumbai',
-        chemistShopPhoneNo: '+91 98765 43210',
-        employeeId: 'EMP001',
-        presentedVisualAdIds: ['1'],
-      ),
-      ChemistShopReporting(
-        id: 'CSR-8813',
-        date: DateTime.now(),
-        time: '01:30 PM',
-        status: 'pending',
-        chemistShopName: 'CareWell Meds',
-        placeOfAppointment: '42 Health St, Main Market, Delhi',
-        chemistShopPhoneNo: '+91 87654 32109',
-        employeeId: 'EMP002',
-        presentedVisualAdIds: ['1', '2'],
-      ),
-    ]);
+    state = state.copyWith(
+      reports: [
+        ChemistShopReporting(
+          id: 'CSR-8812',
+          date: DateTime.now().subtract(const Duration(days: 1)),
+          time: '11:00 AM',
+          status: 'completed',
+          chemistShopName: 'HealthPlus Pharmacy',
+          placeOfAppointment: '101 Wellness Blvd, Sector 4, Mumbai',
+          chemistShopPhoneNo: '+91 98765 43210',
+          employeeId: 'EMP001',
+          presentedVisualAdIds: ['1'],
+        ),
+        ChemistShopReporting(
+          id: 'CSR-8813',
+          date: DateTime.now(),
+          time: '01:30 PM',
+          status: 'pending',
+          chemistShopName: 'CareWell Meds',
+          placeOfAppointment: '42 Health St, Main Market, Delhi',
+          chemistShopPhoneNo: '+91 87654 32109',
+          employeeId: 'EMP002',
+          presentedVisualAdIds: ['1', '2'],
+        ),
+      ],
+    );
   }
 
   void setSearchEmployeeQuery(String query) {

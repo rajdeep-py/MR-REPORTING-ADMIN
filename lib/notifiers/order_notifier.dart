@@ -38,38 +38,43 @@ class OrderNotifier extends StateNotifier<OrderState> {
 
   void _loadMockData() async {
     await Future.delayed(const Duration(milliseconds: 500));
-    state = state.copyWith(orders: [
-      Order(
-        id: 'ORD-9021',
-        orderedOn: DateTime.now().subtract(const Duration(days: 2)),
-        deliveryDate: DateTime.now().add(const Duration(days: 1)),
-        status: 'pending',
-        items: const [OrderItem(productId: '1', quantity: 10), OrderItem(productId: '2', quantity: 5)],
-        totalAmount: 15400.50,
-        employeeId: 'EMP001',
-        chemistShopId: '1', // Matches mock data ID if possible
-      ),
-      Order(
-        id: 'ORD-9022',
-        orderedOn: DateTime.now().subtract(const Duration(days: 5)),
-        deliveryDate: DateTime.now().subtract(const Duration(days: 1)),
-        status: 'completed',
-        items: const [OrderItem(productId: '2', quantity: 20)],
-        totalAmount: 8200.00,
-        employeeId: 'EMP002',
-        doctorId: '1',
-      ),
-      Order(
-        id: 'ORD-9023',
-        orderedOn: DateTime.now().subtract(const Duration(days: 1)),
-        deliveryDate: DateTime.now().add(const Duration(days: 3)),
-        status: 'cancelled',
-        items: const [OrderItem(productId: '1', quantity: 50)],
-        totalAmount: 45000.00,
-        employeeId: 'EMP001',
-        stockistId: '1',
-      ),
-    ]);
+    state = state.copyWith(
+      orders: [
+        Order(
+          id: 'ORD-9021',
+          orderedOn: DateTime.now().subtract(const Duration(days: 2)),
+          deliveryDate: DateTime.now().add(const Duration(days: 1)),
+          status: 'pending',
+          items: const [
+            OrderItem(productId: '1', quantity: 10),
+            OrderItem(productId: '2', quantity: 5),
+          ],
+          totalAmount: 15400.50,
+          employeeId: 'EMP001',
+          chemistShopId: '1', // Matches mock data ID if possible
+        ),
+        Order(
+          id: 'ORD-9022',
+          orderedOn: DateTime.now().subtract(const Duration(days: 5)),
+          deliveryDate: DateTime.now().subtract(const Duration(days: 1)),
+          status: 'completed',
+          items: const [OrderItem(productId: '2', quantity: 20)],
+          totalAmount: 8200.00,
+          employeeId: 'EMP002',
+          doctorId: '1',
+        ),
+        Order(
+          id: 'ORD-9023',
+          orderedOn: DateTime.now().subtract(const Duration(days: 1)),
+          deliveryDate: DateTime.now().add(const Duration(days: 3)),
+          status: 'cancelled',
+          items: const [OrderItem(productId: '1', quantity: 50)],
+          totalAmount: 45000.00,
+          employeeId: 'EMP001',
+          stockistId: '1',
+        ),
+      ],
+    );
   }
 
   void setSearchEmployeeQuery(String query) {

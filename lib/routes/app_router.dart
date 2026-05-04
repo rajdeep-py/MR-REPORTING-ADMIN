@@ -37,6 +37,7 @@ import '../screens/order/order_details_screen.dart';
 import '../screens/gift/gift_screen.dart';
 import '../screens/gift/gift_inventory_screen.dart';
 import '../screens/dashboard/dashboard_screen.dart';
+import '../screens/monthly_target/monthly_target_screen.dart';
 
 class AppRouter {
   static const splash = '/';
@@ -241,6 +242,10 @@ class AppRouter {
       GoRoute(
         path: giftInventory,
         builder: (context, state) => const GiftInventoryScreen(),
+      ),
+      GoRoute(
+        path: monthlyTarget,
+        builder: (context, state) => const MonthlyTargetScreen(),
       ),
     ],
   );

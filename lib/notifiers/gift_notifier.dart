@@ -43,14 +43,16 @@ class GiftNotifier extends StateNotifier<GiftState> {
         const GiftItem(
           id: 'G-101',
           name: 'Premium Pen Set',
-          imageUrl: 'https://images.unsplash.com/photo-1585336261022-680e295ce3fe?w=400&q=80',
+          imageUrl:
+              'https://images.unsplash.com/photo-1585336261022-680e295ce3fe?w=400&q=80',
           description: 'High quality metal body ballpoint pen set.',
           stockCount: 50,
         ),
         const GiftItem(
           id: 'G-102',
           name: 'Desk Organizer',
-          imageUrl: 'https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=400&q=80',
+          imageUrl:
+              'https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=400&q=80',
           description: 'Wooden desk organizer with built-in clock.',
           stockCount: 15,
         ),
