@@ -16,9 +16,9 @@ class ProfileScreen extends ConsumerStatefulWidget {
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
-  
-  late TextEditingController _companyIdController;
-  late TextEditingController _companyNameController;
+
+  late TextEditingController _organisationNameController;
+  late TextEditingController _adminIdController;
   late TextEditingController _cinController;
   late TextEditingController _gstinController;
   late TextEditingController _addressController;
@@ -32,8 +32,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _companyIdController = TextEditingController();
-    _companyNameController = TextEditingController();
+    _organisationNameController = TextEditingController();
+    _adminIdController = TextEditingController();
     _cinController = TextEditingController();
     _gstinController = TextEditingController();
     _addressController = TextEditingController();
@@ -48,21 +48,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     super.didChangeDependencies();
     if (!_isInit) {
       final authState = ref.read(authProvider);
-      
+
       Future.microtask(() {
         if (!mounted) return;
         final profileNotifier = ref.read(profileProvider.notifier);
         profileNotifier.init(authState.value);
-        
+
         final user = ref.read(profileProvider).user;
         if (user != null) {
-          _companyIdController.text = user.companyId ?? '';
-          _companyNameController.text = user.companyName ?? '';
-          _cinController.text = user.cinNo ?? '';
-          _gstinController.text = user.gstin ?? '';
-          _addressController.text = user.address ?? '';
-          _phoneController.text = user.phoneNo ?? '';
-          _altPhoneController.text = user.alternativePhoneNo ?? '';
+          _organisationNameController.text = user.organisationName;
+          _adminIdController.text = user.adminId;
+          _cinController.text = user.cinNo;
+          _gstinController.text = user.gstinNo ?? '';
+          _addressController.text = user.registeredAddress ?? '';
+          _phoneController.text = user.phoneNo;
+          _altPhoneController.text = user.alternativePhnNo ?? '';
           _emailController.text = user.email;
         }
       });
@@ -72,8 +72,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   @override
   void dispose() {
-    _companyIdController.dispose();
-    _companyNameController.dispose();
+    _organisationNameController.dispose();
+    _adminIdController.dispose();
     _cinController.dispose();
     _gstinController.dispose();
     _addressController.dispose();
@@ -86,14 +86,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   void _handleUpdate() async {
     if (_formKey.currentState!.validate()) {
-      await ref.read(profileProvider.notifier).updateProfile(
-        companyId: _companyIdController.text.trim(),
-        address: _addressController.text.trim(),
-        phoneNo: _phoneController.text.trim(),
-        alternativePhoneNo: _altPhoneController.text.trim(),
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
+      final user = ref.read(profileProvider).user;
+      if (user == null) return;
+
+      await ref
+          .read(profileProvider.notifier)
+          .updateProfile(
+            adminId: user.adminId,
+            organisationName: _organisationNameController.text.trim(),
+            registeredAddress: _addressController.text.trim(),
+            phoneNo: _phoneController.text.trim(),
+            alternativePhnNo: _altPhoneController.text.trim(),
+            email: _emailController.text.trim(),
+            password: _passwordController.text.trim(),
+            gstinNo: _gstinController.text.trim(),
+          );
 
       final profileState = ref.read(profileProvider);
       if (profileState.error != null) {
@@ -110,6 +117,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           message: 'Profile updated successfully!',
         );
         _passwordController.clear();
+        // Update auth state too
+        if (profileState.user != null) {
+          ref.read(authProvider.notifier).updateUser(profileState.user!);
+        }
       }
     }
   }
@@ -145,7 +156,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         decoration: BoxDecoration(
                           color: AppColors.white,
                           borderRadius: BorderRadius.circular(24),
-                          border: Border.all(color: AppColors.lightGrey, width: 1),
+                          border: Border.all(
+                            color: AppColors.lightGrey,
+                            width: 1,
+                          ),
                           boxShadow: [
                             BoxShadow(
                               color: AppColors.black.withAlpha(10),
@@ -162,13 +176,29 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               decoration: BoxDecoration(
                                 color: AppColors.surface,
                                 shape: BoxShape.circle,
-                                border: Border.all(color: AppColors.lightGrey, width: 2),
+                                border: Border.all(
+                                  color: AppColors.lightGrey,
+                                  width: 2,
+                                ),
+                                image: profileState.user?.profilePhoto != null
+                                    ? DecorationImage(
+                                        image: NetworkImage(
+                                          profileState.user!.profilePhoto!,
+                                        ),
+                                        fit: BoxShape.circle == BoxShape.circle
+                                            ? BoxFit.cover
+                                            : BoxFit
+                                                  .contain, // Placeholder logic
+                                      )
+                                    : null,
                               ),
-                              child: const Icon(
-                                Iconsax.building_3,
-                                size: 40,
-                                color: AppColors.darkGrey,
-                              ),
+                              child: profileState.user?.profilePhoto == null
+                                  ? const Icon(
+                                      Iconsax.building_3,
+                                      size: 40,
+                                      color: AppColors.darkGrey,
+                                    )
+                                  : null,
                             ),
                             const SizedBox(width: 24),
                             Expanded(
@@ -176,18 +206,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    profileState.user?.name ?? 'Organisation Admin',
-                                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                                      color: AppColors.black,
-                                    ),
+                                    profileState.user?.organisationName ??
+                                        'Organisation Admin',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .displayMedium
+                                        ?.copyWith(color: AppColors.black),
                                   ),
                                   AppGaps.smallV,
                                   Text(
-                                    profileState.user?.companyName ?? 'Your Company',
-                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                      color: AppColors.darkGrey,
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                    'Admin Portal Account',
+                                    style: Theme.of(context).textTheme.bodyLarge
+                                        ?.copyWith(
+                                          color: AppColors.darkGrey,
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                   ),
                                 ],
                               ),
@@ -197,7 +230,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                       AppGaps.extraLargeV,
                       AppGaps.mediumV,
-                      
+
                       // Form Section
                       Text(
                         'Company Details',
@@ -208,47 +241,39 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                       AppGaps.largeV,
 
-                      _buildResponsiveRow(
-                        isDesktop,
-                        [
-                          _buildTextField(
-                            controller: _companyIdController,
-                            label: 'Company ID',
-                            icon: Iconsax.tag,
-                            readOnly: false,
-                          ),
-                          _buildTextField(
-                            controller: _companyNameController,
-                            label: 'Company Name',
-                            icon: Iconsax.building,
-                            readOnly: true,
-                          ),
-                        ],
-                      ),
+                      _buildResponsiveRow(isDesktop, [
+                        _buildTextField(
+                          controller: _adminIdController,
+                          label: 'Admin ID',
+                          icon: Iconsax.tag,
+                          readOnly: true,
+                        ),
+                        _buildTextField(
+                          controller: _organisationNameController,
+                          label: 'Organisation Name',
+                          icon: Iconsax.building,
+                        ),
+                      ]),
                       AppGaps.largeV,
 
-                      _buildResponsiveRow(
-                        isDesktop,
-                        [
-                          _buildTextField(
-                            controller: _cinController,
-                            label: 'CIN No',
-                            icon: Iconsax.document_text,
-                            readOnly: true,
-                          ),
-                          _buildTextField(
-                            controller: _gstinController,
-                            label: 'GSTIN',
-                            icon: Iconsax.receipt_2,
-                            readOnly: true,
-                          ),
-                        ],
-                      ),
+                      _buildResponsiveRow(isDesktop, [
+                        _buildTextField(
+                          controller: _cinController,
+                          label: 'CIN No',
+                          icon: Iconsax.document_text,
+                          readOnly: true,
+                        ),
+                        _buildTextField(
+                          controller: _gstinController,
+                          label: 'GSTIN',
+                          icon: Iconsax.receipt_2,
+                        ),
+                      ]),
                       AppGaps.largeV,
 
                       _buildTextField(
                         controller: _addressController,
-                        label: 'Address',
+                        label: 'Registered Address',
                         icon: Iconsax.location,
                       ),
                       AppGaps.extraLargeV,
@@ -262,23 +287,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                       AppGaps.largeV,
 
-                      _buildResponsiveRow(
-                        isDesktop,
-                        [
-                          _buildTextField(
-                            controller: _phoneController,
-                            label: 'Phone No',
-                            icon: Iconsax.call,
-                            keyboardType: TextInputType.phone,
-                          ),
-                          _buildTextField(
-                            controller: _altPhoneController,
-                            label: 'Alternative Phone No',
-                            icon: Iconsax.call_add,
-                            keyboardType: TextInputType.phone,
-                          ),
-                        ],
-                      ),
+                      _buildResponsiveRow(isDesktop, [
+                        _buildTextField(
+                          controller: _phoneController,
+                          label: 'Phone No',
+                          icon: Iconsax.call,
+                          keyboardType: TextInputType.phone,
+                        ),
+                        _buildTextField(
+                          controller: _altPhoneController,
+                          label: 'Alternative Phone No',
+                          icon: Iconsax.call_add,
+                          keyboardType: TextInputType.phone,
+                        ),
+                      ]),
                       AppGaps.extraLargeV,
 
                       Text(
@@ -290,30 +312,29 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                       AppGaps.largeV,
 
-                      _buildResponsiveRow(
-                        isDesktop,
-                        [
-                          _buildTextField(
-                            controller: _emailController,
-                            label: 'Email ID',
-                            icon: Iconsax.sms,
-                            keyboardType: TextInputType.emailAddress,
-                          ),
-                          _buildTextField(
-                            controller: _passwordController,
-                            label: 'Password',
-                            icon: Iconsax.lock,
-                            obscureText: true,
-                            hintText: 'Enter new password to change',
-                          ),
-                        ],
-                      ),
+                      _buildResponsiveRow(isDesktop, [
+                        _buildTextField(
+                          controller: _emailController,
+                          label: 'Email ID',
+                          icon: Iconsax.sms,
+                          keyboardType: TextInputType.emailAddress,
+                        ),
+                        _buildTextField(
+                          controller: _passwordController,
+                          label: 'Password',
+                          icon: Iconsax.lock,
+                          obscureText: true,
+                          hintText: 'Enter new password to change',
+                        ),
+                      ]),
                       AppGaps.extraLargeV,
                       AppGaps.largeV,
 
                       // Update Button
                       Align(
-                        alignment: isDesktop ? Alignment.centerRight : Alignment.center,
+                        alignment: isDesktop
+                            ? Alignment.centerRight
+                            : Alignment.center,
                         child: SizedBox(
                           width: isDesktop ? 200 : double.infinity,
                           child: ElevatedButton(
@@ -347,24 +368,32 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     if (isDesktop) {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: children.map((child) => Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(
-              right: child == children.last ? 0 : 24.0,
-            ),
-            child: child,
-          ),
-        )).toList(),
+        children: children
+            .map(
+              (child) => Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    right: child == children.last ? 0 : 24.0,
+                  ),
+                  child: child,
+                ),
+              ),
+            )
+            .toList(),
       );
     } else {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: children.map((child) => Padding(
-          padding: EdgeInsets.only(
-            bottom: child == children.last ? 0 : 24.0,
-          ),
-          child: child,
-        )).toList(),
+        children: children
+            .map(
+              (child) => Padding(
+                padding: EdgeInsets.only(
+                  bottom: child == children.last ? 0 : 24.0,
+                ),
+                child: child,
+              ),
+            )
+            .toList(),
       );
     }
   }
@@ -401,7 +430,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             hintText: hintText ?? label,
             prefixIcon: Icon(icon, color: AppColors.darkGrey),
             filled: true,
-            fillColor: readOnly ? AppColors.lightGrey.withAlpha(76) : AppColors.surface,
+            fillColor: readOnly
+                ? AppColors.lightGrey.withAlpha(76)
+                : AppColors.surface,
           ),
           validator: (value) {
             if (!readOnly && !obscureText && (value == null || value.isEmpty)) {

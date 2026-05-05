@@ -1,51 +1,76 @@
 class AdminUser {
-  final String id;
+  final String adminId;
+  final String organisationName;
+  final String phoneNo;
+  final String? alternativePhnNo;
   final String email;
-  final String name;
-  final String? companyId;
-  final String? companyName;
-  final String? cinNo;
-  final String? gstin;
-  final String? address;
-  final String? phoneNo;
-  final String? alternativePhoneNo;
+  final String? registeredAddress;
+  final String? profilePhoto;
+  final String cinNo;
+  final String? gstinNo;
+  final String status;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   AdminUser({
-    required this.id,
+    required this.adminId,
+    required this.organisationName,
+    required this.phoneNo,
+    this.alternativePhnNo,
     required this.email,
-    required this.name,
-    this.companyId,
-    this.companyName,
-    this.cinNo,
-    this.gstin,
-    this.address,
-    this.phoneNo,
-    this.alternativePhoneNo,
+    this.registeredAddress,
+    this.profilePhoto,
+    required this.cinNo,
+    this.gstinNo,
+    required this.status,
+    this.createdAt,
+    this.updatedAt,
   });
 
+  factory AdminUser.fromJson(Map<String, dynamic> json) {
+    return AdminUser(
+      adminId: json['admin_id'] ?? '',
+      organisationName: json['organisation_name'] ?? '',
+      phoneNo: json['phone_no'] ?? '',
+      alternativePhnNo: json['alternative_phn_no'],
+      email: json['email'] ?? '',
+      registeredAddress: json['registered_address'],
+      profilePhoto: json['profile_photo'],
+      cinNo: json['cin_no'] ?? '',
+      gstinNo: json['gstin_no'],
+      status: json['status'] ?? 'active',
+      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
+      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
+    );
+  }
+
   AdminUser copyWith({
-    String? id,
-    String? email,
-    String? name,
-    String? companyId,
-    String? companyName,
-    String? cinNo,
-    String? gstin,
-    String? address,
+    String? adminId,
+    String? organisationName,
     String? phoneNo,
-    String? alternativePhoneNo,
+    String? alternativePhnNo,
+    String? email,
+    String? registeredAddress,
+    String? profilePhoto,
+    String? cinNo,
+    String? gstinNo,
+    String? status,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return AdminUser(
-      id: id ?? this.id,
-      email: email ?? this.email,
-      name: name ?? this.name,
-      companyId: companyId ?? this.companyId,
-      companyName: companyName ?? this.companyName,
-      cinNo: cinNo ?? this.cinNo,
-      gstin: gstin ?? this.gstin,
-      address: address ?? this.address,
+      adminId: adminId ?? this.adminId,
+      organisationName: organisationName ?? this.organisationName,
       phoneNo: phoneNo ?? this.phoneNo,
-      alternativePhoneNo: alternativePhoneNo ?? this.alternativePhoneNo,
+      alternativePhnNo: alternativePhnNo ?? this.alternativePhnNo,
+      email: email ?? this.email,
+      registeredAddress: registeredAddress ?? this.registeredAddress,
+      profilePhoto: profilePhoto ?? this.profilePhoto,
+      cinNo: cinNo ?? this.cinNo,
+      gstinNo: gstinNo ?? this.gstinNo,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

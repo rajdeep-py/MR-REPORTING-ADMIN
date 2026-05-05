@@ -1,21 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import '../models/admin_user.dart';
+import '../services/auth_profile/auth_profile_services.dart';
 
 class AuthNotifier extends StateNotifier<AsyncValue<AdminUser?>> {
+  final AuthProfileServices _services = AuthProfileServices();
+
   AuthNotifier() : super(const AsyncValue.data(null));
 
   Future<void> login(String email, String password) async {
     state = const AsyncValue.loading();
     try {
-      // Simulate network request
-      await Future.delayed(const Duration(seconds: 2));
-
-      // Basic dummy validation
-      if (email.isNotEmpty && password.length >= 6) {
-        state = AsyncValue.data(
-          AdminUser(id: '1', email: email, name: 'Organisation Admin'),
-        );
+      final user = await _services.login(email, password);
+      if (user != null) {
+        state = AsyncValue.data(user);
       } else {
         throw Exception('Invalid email or password');
       }
@@ -26,5 +24,9 @@ class AuthNotifier extends StateNotifier<AsyncValue<AdminUser?>> {
 
   void logout() {
     state = const AsyncValue.data(null);
+  }
+
+  void updateUser(AdminUser user) {
+    state = AsyncValue.data(user);
   }
 }

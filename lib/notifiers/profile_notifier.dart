@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter_riverpod/legacy.dart';
 import '../models/admin_user.dart';
+import '../services/auth_profile/auth_profile_services.dart';
 
 class ProfileState {
   final AdminUser? user;
@@ -30,54 +32,65 @@ class ProfileState {
 }
 
 class ProfileNotifier extends StateNotifier<ProfileState> {
+  final AuthProfileServices _services = AuthProfileServices();
+
   ProfileNotifier() : super(ProfileState());
 
   void init(AdminUser? loggedInUser) {
     if (state.user == null && loggedInUser != null) {
-      state = state.copyWith(
-        user: loggedInUser.copyWith(
-          companyId: loggedInUser.companyId ?? 'COMP-12345',
-          companyName: loggedInUser.companyName ?? 'Naiyo24 Tech',
-          cinNo: loggedInUser.cinNo ?? 'L12345MH2024PTC123456',
-          gstin: loggedInUser.gstin ?? '22AAAAA0000A1Z5',
-          address: loggedInUser.address ?? '123 Tech Park, Mumbai',
-          phoneNo: loggedInUser.phoneNo ?? '+91 9876543210',
-          alternativePhoneNo:
-              loggedInUser.alternativePhoneNo ?? '+91 8765432109',
-        ),
-      );
+      state = state.copyWith(user: loggedInUser);
+      fetchProfile(loggedInUser.adminId);
+    }
+  }
+
+  Future<void> fetchProfile(String adminId) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final user = await _services.getAdminById(adminId);
+      if (user != null) {
+        state = state.copyWith(user: user, isLoading: false);
+      }
+    } catch (e) {
+      state = state.copyWith(error: e.toString(), isLoading: false);
     }
   }
 
   Future<void> updateProfile({
-    required String companyId,
-    required String address,
-    required String phoneNo,
-    required String alternativePhoneNo,
-    required String email,
-    required String password,
+    required String adminId,
+    String? organisationName,
+    String? phoneNo,
+    String? alternativePhnNo,
+    String? email,
+    String? password,
+    String? registeredAddress,
+    String? gstinNo,
+    File? profilePhoto,
   }) async {
     state = state.copyWith(isLoading: true, error: null, isSuccess: false);
 
     try {
-      await Future.delayed(const Duration(seconds: 1)); // Simulate API call
+      final updatedUser = await _services.updateAdminProfile(
+        adminId: adminId,
+        organisationName: organisationName,
+        phoneNo: phoneNo,
+        alternativePhnNo: alternativePhnNo,
+        email: email,
+        password: password,
+        registeredAddress: registeredAddress,
+        gstinNo: gstinNo,
+        profilePhoto: profilePhoto,
+      );
 
-      if (state.user != null) {
+      if (updatedUser != null) {
         state = state.copyWith(
-          user: state.user!.copyWith(
-            companyId: companyId,
-            address: address,
-            phoneNo: phoneNo,
-            alternativePhoneNo: alternativePhoneNo,
-            email: email,
-          ),
+          user: updatedUser,
           isSuccess: true,
           isLoading: false,
         );
       }
     } catch (e) {
       state = state.copyWith(
-        error: 'Failed to update profile',
+        error: 'Failed to update profile: $e',
         isLoading: false,
       );
     }

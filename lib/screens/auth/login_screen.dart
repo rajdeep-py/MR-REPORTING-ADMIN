@@ -48,7 +48,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         if (!mounted) return;
         AppTheme.showPremiumSnackBar(
           context: context,
-          message: 'Welcome back, ${authState.value!.name}!',
+          message: 'Welcome back, ${authState.value!.organisationName}!',
         );
         context.go(AppRouter.dashboard);
       }
