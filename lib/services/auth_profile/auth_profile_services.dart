@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
-import 'dart:io';
+import 'dart:typed_data';
 import '../../models/admin_user.dart';
 import '../api_url.dart';
 
@@ -62,7 +62,8 @@ class AuthProfileServices {
     String? registeredAddress,
     String? gstinNo,
     String? status,
-    File? profilePhoto,
+    Uint8List? imageBytes,
+    String? imageName,
   }) async {
     try {
       final Map<String, dynamic> data = {};
@@ -75,10 +76,10 @@ class AuthProfileServices {
       if (gstinNo != null) data['gstin_no'] = gstinNo;
       if (status != null) data['status'] = status;
 
-      if (profilePhoto != null) {
-        data['profile_photo'] = await MultipartFile.fromFile(
-          profilePhoto.path,
-          filename: profilePhoto.path.split('/').last,
+      if (imageBytes != null) {
+        data['profile_photo'] = MultipartFile.fromBytes(
+          imageBytes,
+          filename: imageName ?? 'profile.jpg',
         );
       }
 

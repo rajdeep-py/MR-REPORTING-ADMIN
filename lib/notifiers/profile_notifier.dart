@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter_riverpod/legacy.dart';
 import '../models/admin_user.dart';
 import '../services/auth_profile/auth_profile_services.dart';
@@ -64,7 +64,8 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     String? password,
     String? registeredAddress,
     String? gstinNo,
-    File? profilePhoto,
+    Uint8List? imageBytes,
+    String? imageName,
   }) async {
     state = state.copyWith(isLoading: true, error: null, isSuccess: false);
 
@@ -78,7 +79,8 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
         password: password,
         registeredAddress: registeredAddress,
         gstinNo: gstinNo,
-        profilePhoto: profilePhoto,
+        imageBytes: imageBytes,
+        imageName: imageName,
       );
 
       if (updatedUser != null) {

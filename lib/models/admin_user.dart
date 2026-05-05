@@ -1,3 +1,5 @@
+import '../services/api_url.dart';
+
 class AdminUser {
   final String adminId;
   final String organisationName;
@@ -28,6 +30,11 @@ class AdminUser {
   });
 
   factory AdminUser.fromJson(Map<String, dynamic> json) {
+    String? photoUrl = json['profile_photo'];
+    if (photoUrl != null && !photoUrl.startsWith('http')) {
+      photoUrl = '${ApiUrl.baseUrl}/$photoUrl';
+    }
+
     return AdminUser(
       adminId: json['admin_id'] ?? '',
       organisationName: json['organisation_name'] ?? '',
@@ -35,7 +42,7 @@ class AdminUser {
       alternativePhnNo: json['alternative_phn_no'],
       email: json['email'] ?? '',
       registeredAddress: json['registered_address'],
-      profilePhoto: json['profile_photo'],
+      profilePhoto: photoUrl,
       cinNo: json['cin_no'] ?? '',
       gstinNo: json['gstin_no'],
       status: json['status'] ?? 'active',

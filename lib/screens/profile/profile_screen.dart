@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:file_picker/file_picker.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_bar.dart';
 import '../../providers/auth_provider.dart';
@@ -27,6 +29,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   late TextEditingController _emailController;
   late TextEditingController _passwordController;
 
+  Uint8List? _selectedImageBytes;
+  String? _selectedImageName;
   bool _isInit = false;
 
   @override
@@ -84,6 +88,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    final result = await FilePicker.pickFiles(
+      type: FileType.image,
+      allowMultiple: false,
+      withData: true,
+    );
+
+    if (result != null && result.files.single.bytes != null) {
+      setState(() {
+        _selectedImageBytes = result.files.single.bytes;
+        _selectedImageName = result.files.single.name;
+      });
+    }
+  }
+
   void _handleUpdate() async {
     if (_formKey.currentState!.validate()) {
       final user = ref.read(profileProvider).user;
@@ -100,6 +119,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             email: _emailController.text.trim(),
             password: _passwordController.text.trim(),
             gstinNo: _gstinController.text.trim(),
+            imageBytes: _selectedImageBytes,
+            imageName: _selectedImageName,
           );
 
       final profileState = ref.read(profileProvider);
@@ -117,6 +138,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           message: 'Profile updated successfully!',
         );
         _passwordController.clear();
+        setState(() {
+          _selectedImageBytes = null;
+          _selectedImageName = null;
+        });
         // Update auth state too
         if (profileState.user != null) {
           ref.read(authProvider.notifier).updateUser(profileState.user!);
@@ -170,35 +195,68 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ),
                         child: Row(
                           children: [
-                            Container(
-                              width: 80,
-                              height: 80,
-                              decoration: BoxDecoration(
-                                color: AppColors.surface,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: AppColors.lightGrey,
-                                  width: 2,
-                                ),
-                                image: profileState.user?.profilePhoto != null
-                                    ? DecorationImage(
-                                        image: NetworkImage(
-                                          profileState.user!.profilePhoto!,
-                                        ),
-                                        fit: BoxShape.circle == BoxShape.circle
-                                            ? BoxFit.cover
-                                            : BoxFit
-                                                  .contain, // Placeholder logic
-                                      )
-                                    : null,
+                            GestureDetector(
+                              onTap: _pickImage,
+                              child: Stack(
+                                children: [
+                                  Container(
+                                    width: 100,
+                                    height: 100,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.surface,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: AppColors.lightGrey,
+                                        width: 2,
+                                      ),
+                                      image: _selectedImageBytes != null
+                                          ? DecorationImage(
+                                              image: MemoryImage(
+                                                _selectedImageBytes!,
+                                              ),
+                                              fit: BoxFit.cover,
+                                            )
+                                          : profileState.user?.profilePhoto !=
+                                                null
+                                          ? DecorationImage(
+                                              image: NetworkImage(
+                                                profileState
+                                                    .user!
+                                                    .profilePhoto!,
+                                              ),
+                                              fit: BoxFit.cover,
+                                            )
+                                          : null,
+                                    ),
+                                    child:
+                                        _selectedImageBytes == null &&
+                                            profileState.user?.profilePhoto ==
+                                                null
+                                        ? const Icon(
+                                            Iconsax.building_3,
+                                            size: 40,
+                                            color: AppColors.darkGrey,
+                                          )
+                                        : null,
+                                  ),
+                                  Positioned(
+                                    bottom: 0,
+                                    right: 0,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: const BoxDecoration(
+                                        color: AppColors.black,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Iconsax.camera,
+                                        color: AppColors.white,
+                                        size: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              child: profileState.user?.profilePhoto == null
-                                  ? const Icon(
-                                      Iconsax.building_3,
-                                      size: 40,
-                                      color: AppColors.darkGrey,
-                                    )
-                                  : null,
                             ),
                             const SizedBox(width: 24),
                             Expanded(
