@@ -1,19 +1,48 @@
 class PrivacyPolicy {
-  final String id;
-  final String header;
-  final String description;
+  final String privacyId;
+  final String privacyHeader;
+  final String privacyDescription;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   const PrivacyPolicy({
-    required this.id,
-    required this.header,
-    required this.description,
+    required this.privacyId,
+    required this.privacyHeader,
+    required this.privacyDescription,
+    this.createdAt,
+    this.updatedAt,
   });
 
-  PrivacyPolicy copyWith({String? id, String? header, String? description}) {
+  factory PrivacyPolicy.fromJson(Map<String, dynamic> json) {
     return PrivacyPolicy(
-      id: id ?? this.id,
-      header: header ?? this.header,
-      description: description ?? this.description,
+      privacyId: json['privacy_id'] ?? '',
+      privacyHeader: json['privacy_header'] ?? '',
+      privacyDescription: json['privacy_description'] ?? '',
+      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
+      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'privacy_header': privacyHeader,
+      'privacy_description': privacyDescription,
+    };
+  }
+
+  PrivacyPolicy copyWith({
+    String? privacyId,
+    String? privacyHeader,
+    String? privacyDescription,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return PrivacyPolicy(
+      privacyId: privacyId ?? this.privacyId,
+      privacyHeader: privacyHeader ?? this.privacyHeader,
+      privacyDescription: privacyDescription ?? this.privacyDescription,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

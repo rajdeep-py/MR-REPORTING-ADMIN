@@ -4,5 +4,5 @@ import '../models/privacy_policy.dart';
 
 final privacyPolicyProvider =
     StateNotifierProvider<PrivacyPolicyNotifier, List<PrivacyPolicy>>((ref) {
-      return PrivacyPolicyNotifier();
-    });
+  return PrivacyPolicyNotifier();
+});

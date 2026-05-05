@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:iconsax/iconsax.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/side_nav_bar.dart';
@@ -17,18 +18,39 @@ class PrivacyPolicyScreen extends ConsumerWidget {
       backgroundColor: AppColors.background,
       appBar: const PremiumAppBar(
         title: 'Privacy Policy',
-        subtitle: 'Learn how we collect and use your data',
+        subtitle: 'Manage application privacy guidelines',
       ),
       drawer: const SideNavBar(),
-      body: policies.isEmpty
-          ? const Center(child: CircularProgressIndicator(color: AppColors.black))
-          : ListView.builder(
-              padding: const EdgeInsets.all(AppGaps.screenPadding),
-              itemCount: policies.length,
-              itemBuilder: (context, index) {
-                return PrivacyPolicyCard(policy: policies[index]);
-              },
-            ),
+      body: RefreshIndicator(
+        onRefresh: () => ref.read(privacyPolicyProvider.notifier).fetchPolicies(),
+        color: AppColors.black,
+        child: policies.isEmpty
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Iconsax.document_text, size: 64, color: AppColors.lightGrey),
+                    AppGaps.mediumV,
+                    const Text(
+                      'No privacy policies found',
+                      style: TextStyle(color: AppColors.darkGrey, fontSize: 16),
+                    ),
+                    AppGaps.smallV,
+                    TextButton(
+                      onPressed: () => ref.read(privacyPolicyProvider.notifier).fetchPolicies(),
+                      child: const Text('Retry Fetch', style: TextStyle(color: AppColors.black)),
+                    ),
+                  ],
+                ),
+              )
+            : ListView.builder(
+                padding: const EdgeInsets.all(AppGaps.screenPadding),
+                itemCount: policies.length,
+                itemBuilder: (context, index) {
+                  return PrivacyPolicyCard(policy: policies[index]);
+                },
+              ),
+      ),
     );
   }
 }

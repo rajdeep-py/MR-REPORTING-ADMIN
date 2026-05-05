@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_theme.dart';
 import '../../models/privacy_policy.dart';
 
-class PrivacyPolicyCard extends StatelessWidget {
+class PrivacyPolicyCard extends ConsumerWidget {
   final PrivacyPolicy policy;
   const PrivacyPolicyCard({super.key, required this.policy});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(24),
@@ -16,6 +17,13 @@ class PrivacyPolicyCard extends StatelessWidget {
         color: AppColors.white,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: AppColors.lightGrey.withAlpha(128)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.black.withAlpha(10),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -33,9 +41,40 @@ class PrivacyPolicyCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(policy.header, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        policy.privacyHeader,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.black,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
                 AppGaps.smallV,
-                Text(policy.description, style: const TextStyle(color: AppColors.darkGrey, height: 1.5)),
+                Text(
+                  policy.privacyDescription,
+                  style: const TextStyle(
+                    color: AppColors.darkGrey,
+                    height: 1.5,
+                    fontSize: 15,
+                  ),
+                ),
+                if (policy.updatedAt != null) ...[
+                  AppGaps.smallV,
+                  Text(
+                    "Last updated: ${policy.updatedAt.toString().split(' ')[0]}",
+                    style: const TextStyle(
+                      color: AppColors.lightGrey,
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
