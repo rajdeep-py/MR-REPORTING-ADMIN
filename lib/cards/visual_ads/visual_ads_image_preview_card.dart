@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
 import '../../theme/app_theme.dart';
 
 class VisualAdsImagePreviewCard extends StatelessWidget {
@@ -10,21 +9,33 @@ class VisualAdsImagePreviewCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: EdgeInsets.zero,
-      child: Stack(
-        fit: StackFit.expand,
+      insetPadding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          InteractiveViewer(
-            child: imagePath.startsWith('http')
-                ? Image.network(imagePath, fit: BoxFit.contain)
-                : Image.file(File(imagePath), fit: BoxFit.contain),
-          ),
-          Positioned(
-            top: 40,
-            right: 20,
+          Align(
+            alignment: Alignment.centerRight,
             child: IconButton(
               icon: const Icon(Icons.close, color: AppColors.white, size: 32),
               onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+          Flexible(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                color: AppColors.black.withAlpha(50),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: InteractiveViewer(
+                child: Image.network(
+                  imagePath,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => const Center(
+                    child: Icon(Icons.error, color: AppColors.white, size: 40),
+                  ),
+                ),
+              ),
             ),
           ),
         ],

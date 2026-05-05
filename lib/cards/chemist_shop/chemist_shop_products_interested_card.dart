@@ -13,7 +13,9 @@ class ChemistShopProductsInterestedCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final visualAdsState = ref.watch(visualAdsProvider);
-    final interestedProducts = visualAdsState.ads.where((ad) => shop.interestedProductIds.contains(ad.id)).toList();
+    final interestedProducts = visualAdsState.ads
+        .where((ad) => shop.interestedProductIds.contains(ad.visualAdId))
+        .toList();
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -30,45 +32,62 @@ class ChemistShopProductsInterestedCard extends ConsumerWidget {
             children: [
               const Icon(Iconsax.box, color: AppColors.black, size: 20),
               AppGaps.mediumH,
-              const Text('Products Interested In', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
+              const Text(
+                'Products Interested In',
+                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+              ),
             ],
           ),
           AppGaps.largeV,
           if (interestedProducts.isEmpty)
-            const Text('No specific product interests found.', style: TextStyle(color: AppColors.darkGrey))
+            const Text(
+              'No specific product interests found.',
+              style: TextStyle(color: AppColors.darkGrey),
+            )
           else
             Wrap(
               spacing: 12,
               runSpacing: 12,
-              children: interestedProducts.map((ad) => Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.lightGrey),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
+              children: interestedProducts
+                  .map(
+                    (ad) => Container(
+                      padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        image: DecorationImage(
-                          image: ad.imagePath.startsWith('http')
-                              ? NetworkImage(ad.imagePath) as ImageProvider
-                              : FileImage(File(ad.imagePath)),
-                          fit: BoxFit.cover,
-                        ),
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppColors.lightGrey),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              // image: DecorationImage(
+                              //   image: ad.productImage.startsWith('http')
+                              //       ? NetworkImage(ad.productImage)
+                              //             as ImageProvider
+                              //       : FileImage(File(ad.productImage)),
+                              //   fit: BoxFit.cover,
+                              // ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            ad.productName,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Text(ad.productName, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                    const SizedBox(width: 8),
-                  ],
-                ),
-              )).toList(),
+                  )
+                  .toList(),
             ),
         ],
       ),
