@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_theme.dart';
 import '../../models/terms_conditions.dart';
 
-class TermsConditionsCard extends StatelessWidget {
+class TermsConditionsCard extends ConsumerWidget {
   final TermsCondition condition;
   const TermsConditionsCard({super.key, required this.condition});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(24),
@@ -16,6 +17,13 @@ class TermsConditionsCard extends StatelessWidget {
         color: AppColors.white,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: AppColors.lightGrey.withAlpha(128)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.black.withAlpha(10),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -33,9 +41,33 @@ class TermsConditionsCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(condition.header, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
+                Text(
+                  condition.termHeader,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.black,
+                      ),
+                ),
                 AppGaps.smallV,
-                Text(condition.description, style: const TextStyle(color: AppColors.darkGrey, height: 1.5)),
+                Text(
+                  condition.termDescription,
+                  style: const TextStyle(
+                    color: AppColors.darkGrey,
+                    height: 1.5,
+                    fontSize: 15,
+                  ),
+                ),
+                if (condition.updatedAt != null) ...[
+                  AppGaps.smallV,
+                  Text(
+                    "Last updated: ${condition.updatedAt.toString().split(' ')[0]}",
+                    style: const TextStyle(
+                      color: AppColors.lightGrey,
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

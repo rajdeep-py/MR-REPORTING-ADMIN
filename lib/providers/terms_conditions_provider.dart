@@ -4,5 +4,5 @@ import '../models/terms_conditions.dart';
 
 final termsConditionsProvider =
     StateNotifierProvider<TermsConditionsNotifier, List<TermsCondition>>((ref) {
-      return TermsConditionsNotifier();
-    });
+  return TermsConditionsNotifier();
+});
