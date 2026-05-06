@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
 import 'package:iconsax/iconsax.dart';
 import '../../theme/app_theme.dart';
 import '../../models/employee.dart';
@@ -33,7 +32,7 @@ class EmployeeCard extends StatelessWidget {
           radius: 28,
           backgroundColor: AppColors.surface,
           backgroundImage: employee.profilePhotoPath != null
-              ? FileImage(File(employee.profilePhotoPath!))
+              ? NetworkImage(employee.profilePhotoPath!)
               : null,
           child: employee.profilePhotoPath == null
               ? const Icon(Iconsax.user, color: AppColors.darkGrey)
@@ -55,6 +54,22 @@ class EmployeeCard extends StatelessWidget {
                 employee.headquarter,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppColors.darkGrey,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: employee.status == 'active' ? Colors.green.withAlpha(20) : Colors.red.withAlpha(20),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  employee.status.toUpperCase(),
+                  style: TextStyle(
+                    color: employee.status == 'active' ? Colors.green : Colors.red,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ],

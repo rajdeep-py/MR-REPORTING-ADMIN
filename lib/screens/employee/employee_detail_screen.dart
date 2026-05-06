@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'dart:io';
 import 'package:iconsax/iconsax.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_bar.dart';
 import '../../providers/employee_provider.dart';
 import '../../routes/app_router.dart';
+import '../../models/employee.dart';
 
 class EmployeeDetailScreen extends ConsumerWidget {
   final String id;
@@ -19,7 +19,10 @@ class EmployeeDetailScreen extends ConsumerWidget {
     
     final isExisting = state.employees.any((e) => e.id == id);
     if (!isExisting) {
-      return const Scaffold(body: Center(child: Text('Employee not found')));
+      return Scaffold(
+        appBar: PremiumAppBar(title: 'Not Found', showBackButton: true),
+        body: const Center(child: Text('Employee not found')),
+      );
     }
     
     final employee = state.employees.firstWhere((e) => e.id == id);
@@ -50,8 +53,6 @@ class EmployeeDetailScreen extends ConsumerWidget {
                         _buildContactCard(context, employee),
                         AppGaps.largeV,
                         _buildWorkCard(context, employee),
-                        AppGaps.largeV,
-                        _buildSecurityCard(context, employee),
                       ],
                     ),
                   ),
@@ -65,15 +66,13 @@ class EmployeeDetailScreen extends ConsumerWidget {
                   _buildContactCard(context, employee),
                   AppGaps.largeV,
                   _buildWorkCard(context, employee),
-                  AppGaps.largeV,
-                  _buildSecurityCard(context, employee),
                 ],
               ),
       ),
     );
   }
 
-  Widget _buildProfileCard(BuildContext context, employee, WidgetRef ref) {
+  Widget _buildProfileCard(BuildContext context, Employee employee, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
@@ -100,7 +99,7 @@ class EmployeeDetailScreen extends ConsumerWidget {
               radius: 60,
               backgroundColor: AppColors.surface,
               backgroundImage: employee.profilePhotoPath != null
-                  ? FileImage(File(employee.profilePhotoPath!))
+                  ? NetworkImage(employee.profilePhotoPath!)
                   : null,
               child: employee.profilePhotoPath == null
                   ? const Icon(Iconsax.user, size: 48, color: AppColors.black)
@@ -117,6 +116,15 @@ class EmployeeDetailScreen extends ConsumerWidget {
             textAlign: TextAlign.center,
           ),
           AppGaps.smallV,
+          Text(
+            employee.designation,
+            style: const TextStyle(
+              color: AppColors.darkGrey,
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+            ),
+          ),
+          AppGaps.mediumV,
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
@@ -164,7 +172,7 @@ class EmployeeDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildContactCard(BuildContext context, employee) {
+  Widget _buildContactCard(BuildContext context, Employee employee) {
     return _buildSectionCard(
       context,
       title: 'Contact Information',
@@ -178,26 +186,21 @@ class EmployeeDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildWorkCard(BuildContext context, employee) {
+  Widget _buildWorkCard(BuildContext context, Employee employee) {
+    String areas = 'N/A';
+    if (employee.areaOfWork != null) {
+      final list = employee.areaOfWork!['areas'] as List?;
+      areas = list?.join(', ') ?? 'N/A';
+    }
+
     return _buildSectionCard(
       context,
       title: 'Work Details',
       icon: Iconsax.briefcase,
       children: [
         _buildInfoTile(Iconsax.location, 'Headquarter', employee.headquarter),
-        _buildInfoTile(Iconsax.map, 'Areas of Work', employee.areasOfWork.join(', ')),
-        _buildInfoTile(Iconsax.money, 'Monthly Target', '₹${employee.monthlyTarget.toStringAsFixed(2)}'),
-      ],
-    );
-  }
-
-  Widget _buildSecurityCard(BuildContext context, employee) {
-    return _buildSectionCard(
-      context,
-      title: 'Security',
-      icon: Iconsax.shield_tick,
-      children: [
-        _buildInfoTile(Iconsax.lock, 'Account Password', employee.password, isObscured: true),
+        _buildInfoTile(Iconsax.map, 'Areas of Work', areas),
+        _buildInfoTile(Iconsax.money, 'Monthly Target', employee.monthlyTarget != null ? '₹${employee.monthlyTarget}' : 'N/A'),
       ],
     );
   }
@@ -316,10 +319,14 @@ class EmployeeDetailScreen extends ConsumerWidget {
             child: const Text('Cancel', style: TextStyle(color: AppColors.darkGrey)),
           ),
           ElevatedButton(
-            onPressed: () {
-              ref.read(employeeProvider.notifier).deleteEmployee(id);
-              Navigator.pop(context);
-              context.pop();
+            onPressed: () async {
+              final success = await ref.read(employeeProvider.notifier).deleteEmployee(id);
+              if (success) {
+                if (!context.mounted) return;
+                Navigator.pop(context);
+                context.pop();
+                AppTheme.showPremiumSnackBar(context: context, message: 'Employee deleted');
+              }
             },
             child: const Text('Delete', style: TextStyle(color: AppColors.white)),
           ),

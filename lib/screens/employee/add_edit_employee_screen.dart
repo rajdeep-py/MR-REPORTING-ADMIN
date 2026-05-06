@@ -1,13 +1,14 @@
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:file_picker/file_picker.dart';
-import 'dart:io';
 import 'package:iconsax/iconsax.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_bar.dart';
 import '../../providers/employee_provider.dart';
-import '../../models/employee.dart';
+import '../../providers/auth_provider.dart';
 
 class AddEditEmployeeScreen extends ConsumerStatefulWidget {
   final String? id;
@@ -29,7 +30,11 @@ class _AddEditEmployeeScreenState extends ConsumerState<AddEditEmployeeScreen> {
   late TextEditingController _areasCtrl;
   late TextEditingController _targetCtrl;
   late TextEditingController _passCtrl;
-  String? _photoPath;
+  late TextEditingController _designationCtrl;
+
+  Uint8List? _selectedImageBytes;
+  String? _selectedImageName;
+  String? _existingPhotoUrl;
 
   bool get isEditing => widget.id != null;
 
@@ -44,6 +49,7 @@ class _AddEditEmployeeScreenState extends ConsumerState<AddEditEmployeeScreen> {
     _areasCtrl = TextEditingController();
     _targetCtrl = TextEditingController();
     _passCtrl = TextEditingController();
+    _designationCtrl = TextEditingController();
 
     if (isEditing) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -55,11 +61,18 @@ class _AddEditEmployeeScreenState extends ConsumerState<AddEditEmployeeScreen> {
           _altPhoneCtrl.text = emp.alternativePhoneNo ?? '';
           _emailCtrl.text = emp.email;
           _hqCtrl.text = emp.headquarter;
-          _areasCtrl.text = emp.areasOfWork.join(', ');
-          _targetCtrl.text = emp.monthlyTarget.toString();
-          _passCtrl.text = emp.password;
+          _designationCtrl.text = emp.designation;
+          _targetCtrl.text = emp.monthlyTarget?.toString() ?? '';
+          _passCtrl.text = ''; // Password shouldn't be visible
+
+          // Area of Work
+          if (emp.areaOfWork != null) {
+            final areas = emp.areaOfWork!['areas'] as List?;
+            _areasCtrl.text = areas?.join(', ') ?? '';
+          }
+
           setState(() {
-            _photoPath = emp.profilePhotoPath;
+            _existingPhotoUrl = emp.profilePhotoPath;
           });
         } catch (e) {
           // Fallback if id not found
@@ -69,42 +82,97 @@ class _AddEditEmployeeScreenState extends ConsumerState<AddEditEmployeeScreen> {
   }
 
   Future<void> _pickPhoto() async {
-    final result = await FilePicker.pickFiles(type: FileType.image);
-    if (result != null && result.files.single.path != null) {
+    final result = await FilePicker.pickFiles(
+      type: FileType.image,
+      withData: true,
+    );
+    if (result != null && result.files.single.bytes != null) {
       setState(() {
-        _photoPath = result.files.single.path;
+        _selectedImageBytes = result.files.single.bytes;
+        _selectedImageName = result.files.single.name;
       });
     }
   }
 
   void _save() async {
     if (_formKey.currentState!.validate()) {
-      final newEmp = Employee(
-        id: isEditing
-            ? widget.id!
-            : 'EMP${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}',
-        fullName: _nameCtrl.text.trim(),
-        phoneNo: _phoneCtrl.text.trim(),
-        alternativePhoneNo: _altPhoneCtrl.text.trim(),
-        email: _emailCtrl.text.trim(),
-        headquarter: _hqCtrl.text.trim(),
-        areasOfWork: _areasCtrl.text.split(',').map((e) => e.trim()).toList(),
-        monthlyTarget: double.tryParse(_targetCtrl.text) ?? 0,
-        password: _passCtrl.text.trim(),
-        profilePhotoPath: _photoPath,
-      );
+      final authState = ref.read(authProvider);
+      final adminId = authState.value?.adminId;
+      if (adminId == null) return;
 
       final notifier = ref.read(employeeProvider.notifier);
+      final areas = _areasCtrl.text
+          .split(',')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
+      final areaOfWork = {'areas': areas};
+
+      bool success = false;
       if (isEditing) {
-        await notifier.updateEmployee(newEmp);
+        success = await notifier.updateEmployee(
+          employeeId: widget.id!,
+          fullName: _nameCtrl.text.trim(),
+          phoneNo: _phoneCtrl.text.trim(),
+          alternativePhoneNo: _altPhoneCtrl.text.trim(),
+          email: _emailCtrl.text.trim(),
+          password: _passCtrl.text.isEmpty ? null : _passCtrl.text.trim(),
+          headquarter: _hqCtrl.text.trim(),
+          designation: _designationCtrl.text.trim(),
+          monthlyTarget: int.tryParse(_targetCtrl.text),
+          areaOfWork: areaOfWork,
+          imageBytes: _selectedImageBytes,
+          imageName: _selectedImageName,
+        );
       } else {
-        await notifier.addEmployee(newEmp);
+        success = await notifier.addEmployee(
+          fullName: _nameCtrl.text.trim(),
+          phoneNo: _phoneCtrl.text.trim(),
+          alternativePhoneNo: _altPhoneCtrl.text.trim(),
+          email: _emailCtrl.text.trim(),
+          password: _passCtrl.text.trim(),
+          designation: _designationCtrl.text.trim(),
+          adminId: adminId,
+          headquarter: _hqCtrl.text.trim(),
+          monthlyTarget: int.tryParse(_targetCtrl.text),
+          areaOfWork: areaOfWork,
+          imageBytes: _selectedImageBytes,
+          imageName: _selectedImageName,
+        );
       }
 
-      if (mounted) {
+      if (success) {
+        if (!mounted) return;
+        AppTheme.showPremiumSnackBar(
+          context: context,
+          message: isEditing
+              ? 'Employee updated successfully!'
+              : 'Employee onboarded successfully!',
+        );
         context.pop();
+      } else {
+        if (!mounted) return;
+        AppTheme.showPremiumSnackBar(
+          context: context,
+          message: 'Failed to save employee. Please try again.',
+          isError: true,
+        );
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _phoneCtrl.dispose();
+    _altPhoneCtrl.dispose();
+    _emailCtrl.dispose();
+    _hqCtrl.dispose();
+    _areasCtrl.dispose();
+    _targetCtrl.dispose();
+    _passCtrl.dispose();
+    _designationCtrl.dispose();
+    super.dispose();
   }
 
   @override
@@ -116,14 +184,18 @@ class _AddEditEmployeeScreenState extends ConsumerState<AddEditEmployeeScreen> {
       backgroundColor: AppColors.background,
       appBar: PremiumAppBar(
         title: isEditing ? 'Edit Employee' : 'Onboard Employee',
-        subtitle: isEditing ? 'Update employee records' : 'Register a new field force member',
+        subtitle: isEditing
+            ? 'Update employee records'
+            : 'Register a new field force member',
         showBackButton: true,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppGaps.screenPadding),
         child: Form(
           key: _formKey,
-          child: isDesktop ? _buildDesktopLayout(isLoading) : _buildMobileLayout(isLoading),
+          child: isDesktop
+              ? _buildDesktopLayout(isLoading)
+              : _buildMobileLayout(isLoading),
         ),
       ),
     );
@@ -186,7 +258,9 @@ class _AddEditEmployeeScreenState extends ConsumerState<AddEditEmployeeScreen> {
         children: [
           Text(
             'Profile Photo',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
           ),
           AppGaps.mediumV,
           GestureDetector(
@@ -198,14 +272,28 @@ class _AddEditEmployeeScreenState extends ConsumerState<AddEditEmployeeScreen> {
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.black.withAlpha(51), width: 2),
+                    border: Border.all(
+                      color: AppColors.black.withAlpha(51),
+                      width: 2,
+                    ),
                   ),
                   child: CircleAvatar(
                     radius: 70,
                     backgroundColor: AppColors.surface,
-                    backgroundImage: _photoPath != null ? FileImage(File(_photoPath!)) : null,
-                    child: _photoPath == null
-                        ? const Icon(Iconsax.camera, size: 40, color: AppColors.black)
+                    backgroundImage: _selectedImageBytes != null
+                        ? MemoryImage(_selectedImageBytes!)
+                        : (_existingPhotoUrl != null
+                                  ? NetworkImage(_existingPhotoUrl!)
+                                  : null)
+                              as ImageProvider?,
+                    child:
+                        (_selectedImageBytes == null &&
+                            _existingPhotoUrl == null)
+                        ? const Icon(
+                            Iconsax.camera,
+                            size: 40,
+                            color: AppColors.black,
+                          )
                         : null,
                   ),
                 ),
@@ -216,7 +304,11 @@ class _AddEditEmployeeScreenState extends ConsumerState<AddEditEmployeeScreen> {
                     shape: BoxShape.circle,
                     border: Border.all(color: AppColors.white, width: 3),
                   ),
-                  child: const Icon(Iconsax.edit_2, color: AppColors.white, size: 16),
+                  child: const Icon(
+                    Iconsax.edit_2,
+                    color: AppColors.white,
+                    size: 16,
+                  ),
                 ),
               ],
             ),
@@ -246,16 +338,32 @@ class _AddEditEmployeeScreenState extends ConsumerState<AddEditEmployeeScreen> {
           Row(
             children: [
               Expanded(
-                child: _buildField('Phone No', _phoneCtrl, Iconsax.call, keyboardType: TextInputType.phone),
+                child: _buildField(
+                  'Phone No',
+                  _phoneCtrl,
+                  Iconsax.call,
+                  keyboardType: TextInputType.phone,
+                ),
               ),
               AppGaps.mediumH,
               Expanded(
-                child: _buildField('Alternative Phone No', _altPhoneCtrl, Iconsax.call_add, keyboardType: TextInputType.phone, isRequired: false),
+                child: _buildField(
+                  'Alternative Phone No',
+                  _altPhoneCtrl,
+                  Iconsax.call_add,
+                  keyboardType: TextInputType.phone,
+                  isRequired: false,
+                ),
               ),
             ],
           ),
           AppGaps.mediumV,
-          _buildField('Email ID', _emailCtrl, Iconsax.sms, keyboardType: TextInputType.emailAddress),
+          _buildField(
+            'Email ID',
+            _emailCtrl,
+            Iconsax.sms,
+            keyboardType: TextInputType.emailAddress,
+          ),
         ],
       ),
     );
@@ -273,16 +381,33 @@ class _AddEditEmployeeScreenState extends ConsumerState<AddEditEmployeeScreen> {
           Row(
             children: [
               Expanded(
-                child: _buildField('Headquarter', _hqCtrl, Iconsax.location),
+                child: _buildField(
+                  'Designation',
+                  _designationCtrl,
+                  Iconsax.teacher,
+                ),
               ),
               AppGaps.mediumH,
               Expanded(
-                child: _buildField('Monthly Target (₹)', _targetCtrl, Iconsax.money, keyboardType: TextInputType.number),
+                child: _buildField('Headquarter', _hqCtrl, Iconsax.location),
               ),
             ],
           ),
           AppGaps.mediumV,
-          _buildField('Areas of Work (Comma separated)', _areasCtrl, Iconsax.map),
+          _buildField(
+            'Monthly Target (₹)',
+            _targetCtrl,
+            Iconsax.money,
+            keyboardType: TextInputType.number,
+            isRequired: false,
+          ),
+          AppGaps.mediumV,
+          _buildField(
+            'Areas of Work (Comma separated)',
+            _areasCtrl,
+            Iconsax.map,
+            isRequired: false,
+          ),
         ],
       ),
     );
@@ -297,7 +422,21 @@ class _AddEditEmployeeScreenState extends ConsumerState<AddEditEmployeeScreen> {
         children: [
           _buildSectionHeader('Security Settings', Iconsax.shield_tick),
           AppGaps.largeV,
-          _buildField('Account Password', _passCtrl, Iconsax.lock, isPassword: true),
+          _buildField(
+            'Account Password',
+            _passCtrl,
+            Iconsax.lock,
+            isPassword: true,
+            isRequired: !isEditing,
+          ),
+          if (isEditing)
+            const Padding(
+              padding: EdgeInsets.only(top: 8),
+              child: Text(
+                'Leave blank to keep current password',
+                style: TextStyle(color: AppColors.coolGrey, fontSize: 12),
+              ),
+            ),
         ],
       ),
     );
@@ -317,7 +456,9 @@ class _AddEditEmployeeScreenState extends ConsumerState<AddEditEmployeeScreen> {
         AppGaps.mediumH,
         Text(
           title,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
         ),
       ],
     );
@@ -344,7 +485,10 @@ class _AddEditEmployeeScreenState extends ConsumerState<AddEditEmployeeScreen> {
         Expanded(
           child: OutlinedButton(
             onPressed: () => context.pop(),
-            child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w600)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
           ),
         ),
         AppGaps.mediumH,
@@ -356,7 +500,10 @@ class _AddEditEmployeeScreenState extends ConsumerState<AddEditEmployeeScreen> {
                 ? const SizedBox(
                     height: 24,
                     width: 24,
-                    child: CircularProgressIndicator(color: AppColors.white, strokeWidth: 2),
+                    child: CircularProgressIndicator(
+                      color: AppColors.white,
+                      strokeWidth: 2,
+                    ),
                   )
                 : Text(isEditing ? 'Save Changes' : 'Complete Onboarding'),
           ),
@@ -380,10 +527,19 @@ class _AddEditEmployeeScreenState extends ConsumerState<AddEditEmployeeScreen> {
           children: [
             Text(
               label,
-              style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.darkGrey),
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: AppColors.darkGrey,
+              ),
             ),
             if (isRequired)
-              const Text(' *', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
+              const Text(
+                ' *',
+                style: TextStyle(
+                  color: AppColors.error,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
           ],
         ),
         const SizedBox(height: 8),
@@ -394,7 +550,11 @@ class _AddEditEmployeeScreenState extends ConsumerState<AddEditEmployeeScreen> {
           decoration: InputDecoration(
             prefixIcon: Icon(icon, color: AppColors.darkGrey),
           ),
-          validator: isRequired ? (v) => v == null || v.trim().isEmpty ? 'This field is required' : null : null,
+          validator: isRequired
+              ? (v) => v == null || v.trim().isEmpty
+                    ? 'This field is required'
+                    : null
+              : null,
         ),
       ],
     );

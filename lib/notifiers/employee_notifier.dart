@@ -1,11 +1,14 @@
+import 'dart:typed_data';
 import 'package:flutter_riverpod/legacy.dart';
 import '../models/employee.dart';
+import '../services/employee/employee_services.dart';
 
 class EmployeeState {
   final List<Employee> employees;
   final bool isLoading;
   final String? error;
   final String searchQuery;
+  final String filterStatus;
   final String? selectedHeadquarter;
 
   EmployeeState({
@@ -13,6 +16,7 @@ class EmployeeState {
     this.isLoading = false,
     this.error,
     this.searchQuery = '',
+    this.filterStatus = 'All',
     this.selectedHeadquarter,
   });
 
@@ -21,103 +25,157 @@ class EmployeeState {
     bool? isLoading,
     String? error,
     String? searchQuery,
+    String? filterStatus,
     String? selectedHeadquarter,
-    bool clearError = false,
+    bool clearHeadquarter = false,
   }) {
     return EmployeeState(
       employees: employees ?? this.employees,
       isLoading: isLoading ?? this.isLoading,
-      error: clearError ? null : (error ?? this.error),
+      error: error,
       searchQuery: searchQuery ?? this.searchQuery,
-      selectedHeadquarter: selectedHeadquarter ?? this.selectedHeadquarter,
+      filterStatus: filterStatus ?? this.filterStatus,
+      selectedHeadquarter: clearHeadquarter ? null : (selectedHeadquarter ?? this.selectedHeadquarter),
     );
-  }
-
-  List<Employee> get filteredEmployees {
-    return employees.where((e) {
-      final matchesSearch =
-          e.fullName.toLowerCase().contains(searchQuery.toLowerCase()) ||
-          e.phoneNo.contains(searchQuery);
-      final matchesHQ =
-          selectedHeadquarter == null ||
-          selectedHeadquarter!.isEmpty ||
-          e.headquarter == selectedHeadquarter;
-      return matchesSearch && matchesHQ;
-    }).toList();
   }
 }
 
 class EmployeeNotifier extends StateNotifier<EmployeeState> {
-  EmployeeNotifier() : super(EmployeeState()) {
-    _loadMockData();
-  }
+  final EmployeeServices _services = EmployeeServices();
 
-  void _loadMockData() {
-    state = state.copyWith(isLoading: true);
-    // Simulate network delay
-    Future.delayed(const Duration(seconds: 1), () {
-      state = state.copyWith(
-        isLoading: false,
-        employees: [
-          const Employee(
-            id: 'EMP001',
-            fullName: 'Rajdeep Dey',
-            phoneNo: '+91 9876543210',
-            email: 'rajdeep@example.com',
-            headquarter: 'Mumbai',
-            areasOfWork: ['Andheri', 'Bandra', 'Dadar'],
-            monthlyTarget: 500000.0,
-            password: 'password123',
-          ),
-          const Employee(
-            id: 'EMP002',
-            fullName: 'Amit Kumar',
-            phoneNo: '+91 8765432109',
-            email: 'amit@example.com',
-            headquarter: 'Delhi',
-            areasOfWork: ['CP', 'Rohini'],
-            monthlyTarget: 450000.0,
-            password: 'password123',
-          ),
-        ],
-      );
-    });
-  }
+  EmployeeNotifier() : super(EmployeeState());
 
   void setSearchQuery(String query) {
     state = state.copyWith(searchQuery: query);
   }
 
+  void setFilterStatus(String status) {
+    state = state.copyWith(filterStatus: status);
+  }
+
   void setFilterHeadquarter(String? hq) {
-    state = state.copyWith(selectedHeadquarter: hq);
+    if (hq == null) {
+      state = state.copyWith(clearHeadquarter: true);
+    } else {
+      state = state.copyWith(selectedHeadquarter: hq);
+    }
   }
 
-  Future<void> addEmployee(Employee employee) async {
-    state = state.copyWith(isLoading: true, clearError: true);
-    await Future.delayed(const Duration(seconds: 1));
-    state = state.copyWith(
-      isLoading: false,
-      employees: [...state.employees, employee],
-    );
+  Future<void> fetchEmployees(String adminId) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final employees = await _services.getEmployeesByAdmin(adminId);
+      state = state.copyWith(employees: employees, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(error: e.toString(), isLoading: false);
+    }
   }
 
-  Future<void> updateEmployee(Employee employee) async {
-    state = state.copyWith(isLoading: true, clearError: true);
-    await Future.delayed(const Duration(seconds: 1));
-    state = state.copyWith(
-      isLoading: false,
-      employees: state.employees
-          .map((e) => e.id == employee.id ? employee : e)
-          .toList(),
-    );
+  Future<bool> addEmployee({
+    required String fullName,
+    required String phoneNo,
+    required String email,
+    required String password,
+    required String designation,
+    required String adminId,
+    String? alternativePhoneNo,
+    String? headquarter,
+    Map<String, dynamic>? areaOfWork,
+    int? monthlyTarget,
+    Uint8List? imageBytes,
+    String? imageName,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final newEmployee = await _services.createEmployee(
+        fullName: fullName,
+        phoneNo: phoneNo,
+        email: email,
+        password: password,
+        designation: designation,
+        adminId: adminId,
+        alternativePhoneNo: alternativePhoneNo,
+        headquarter: headquarter,
+        areaOfWork: areaOfWork,
+        monthlyTarget: monthlyTarget,
+        imageBytes: imageBytes,
+        imageName: imageName,
+      );
+      if (newEmployee != null) {
+        state = state.copyWith(
+          employees: [...state.employees, newEmployee],
+          isLoading: false,
+        );
+        return true;
+      }
+      return false;
+    } catch (e) {
+      state = state.copyWith(error: e.toString(), isLoading: false);
+      return false;
+    }
   }
 
-  Future<void> deleteEmployee(String id) async {
-    state = state.copyWith(isLoading: true, clearError: true);
-    await Future.delayed(const Duration(seconds: 1));
-    state = state.copyWith(
-      isLoading: false,
-      employees: state.employees.where((e) => e.id != id).toList(),
-    );
+  Future<bool> updateEmployee({
+    required String employeeId,
+    String? fullName,
+    String? phoneNo,
+    String? email,
+    String? password,
+    String? designation,
+    String? alternativePhoneNo,
+    String? headquarter,
+    Map<String, dynamic>? areaOfWork,
+    int? monthlyTarget,
+    String? status,
+    Uint8List? imageBytes,
+    String? imageName,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final updatedEmployee = await _services.updateEmployee(
+        employeeId: employeeId,
+        fullName: fullName,
+        phoneNo: phoneNo,
+        email: email,
+        password: password,
+        designation: designation,
+        alternativePhoneNo: alternativePhoneNo,
+        headquarter: headquarter,
+        areaOfWork: areaOfWork,
+        monthlyTarget: monthlyTarget,
+        status: status,
+        imageBytes: imageBytes,
+        imageName: imageName,
+      );
+      if (updatedEmployee != null) {
+        state = state.copyWith(
+          employees: state.employees.map((e) => e.id == employeeId ? updatedEmployee : e).toList(),
+          isLoading: false,
+        );
+        return true;
+      }
+      return false;
+    } catch (e) {
+      state = state.copyWith(error: e.toString(), isLoading: false);
+      return false;
+    }
+  }
+
+  Future<bool> deleteEmployee(String employeeId) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final success = await _services.deleteEmployee(employeeId);
+      if (success) {
+        state = state.copyWith(
+          employees: state.employees.where((e) => e.id != employeeId).toList(),
+          isLoading: false,
+        );
+        return true;
+      }
+      return false;
+    } catch (e) {
+      state = state.copyWith(error: e.toString(), isLoading: false);
+      return false;
+    }
   }
 }

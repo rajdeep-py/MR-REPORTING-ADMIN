@@ -40,7 +40,7 @@ class MonthlyTargetScreen extends ConsumerWidget {
           children: [
             const MonthlyTargetFilterSearchCard(),
             AppGaps.largeV,
-            const MonthlyTargetCard(),
+            //const MonthlyTargetCard(),
             AppGaps.largeV,
             const MonthlyTargetDetailsCard(),
             AppGaps.extraLargeV,
