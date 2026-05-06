@@ -1,48 +1,81 @@
 import 'package:flutter_riverpod/legacy.dart';
 import '../models/feedback.dart';
+import '../services/feedback/feedback_services.dart';
 
-class FeedbackNotifier extends StateNotifier<List<FeedbackItem>> {
-  FeedbackNotifier() : super([]) {
-    _loadMockData();
-  }
+class FeedbackState {
+  final List<FeedbackItem> feedbacks;
+  final bool isLoading;
+  final String? errorMessage;
 
-  void _loadMockData() async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    final now = DateTime.now();
-    state = [
-      FeedbackItem(
-        id: '1',
-        message:
-            'The new analytics dashboard is great, but it would be helpful to export the reports as PDF.',
-        createdAt: now.subtract(const Duration(days: 2, hours: 4)),
-        replyMessage:
-            'Thank you for your feedback! We are currently working on adding PDF and Excel export features in the upcoming release.',
-        repliedAt: now.subtract(const Duration(days: 1)),
-      ),
-      FeedbackItem(
-        id: '2',
-        message:
-            'Can we add an option to filter employees by region in the attendance tab?',
-        createdAt: now.subtract(const Duration(days: 5)),
-        replyMessage:
-            'Great suggestion! We have noted this down and will discuss it with the product team.',
-        repliedAt: now.subtract(const Duration(days: 4)),
-      ),
-      FeedbackItem(
-        id: '3',
-        message:
-            'There seems to be a minor delay when syncing large expense receipts.',
-        createdAt: now.subtract(const Duration(hours: 2)),
-      ),
-    ];
-  }
+  FeedbackState({
+    this.feedbacks = const [],
+    this.isLoading = false,
+    this.errorMessage,
+  });
 
-  void submitFeedback(String message) {
-    final newItem = FeedbackItem(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      message: message,
-      createdAt: DateTime.now(),
+  FeedbackState copyWith({
+    List<FeedbackItem>? feedbacks,
+    bool? isLoading,
+    String? errorMessage,
+    bool clearError = false,
+  }) {
+    return FeedbackState(
+      feedbacks: feedbacks ?? this.feedbacks,
+      isLoading: isLoading ?? this.isLoading,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
-    state = [newItem, ...state];
+  }
+}
+
+class FeedbackNotifier extends StateNotifier<FeedbackState> {
+  final FeedbackServices _services = FeedbackServices();
+
+  FeedbackNotifier() : super(FeedbackState());
+
+  Future<void> fetchFeedbacks(String adminId) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final feedbacks = await _services.getFeedbackByAdmin(adminId);
+      state = state.copyWith(feedbacks: feedbacks, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+    }
+  }
+
+  Future<bool> submitFeedback(String adminId, String message) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final newFeedback = await _services.createFeedback({
+        'admin_id': adminId,
+        'feedback_message': message,
+      });
+      state = state.copyWith(
+        feedbacks: [newFeedback, ...state.feedbacks],
+        isLoading: false,
+      );
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> deleteFeedback(String feedbackId) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final success = await _services.deleteFeedback(feedbackId);
+      if (success) {
+        state = state.copyWith(
+          feedbacks: state.feedbacks.where((f) => f.feedbackId != feedbackId).toList(),
+          isLoading: false,
+        );
+      } else {
+        state = state.copyWith(isLoading: false, errorMessage: 'Delete failed');
+      }
+      return success;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      return false;
+    }
   }
 }

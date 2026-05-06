@@ -43,4 +43,10 @@ class ApiUrl {
   static const String getAllGifts = '$baseUrl/gift-inventory/all';
   static const String updateGift = '$baseUrl/gift-inventory/update';
   static const String deleteGift = '$baseUrl/gift-inventory/delete';
+
+  // Admin Feedback Endpoints
+  static const String createFeedback = '$baseUrl/admin-feedback/create';
+  static const String getAllFeedback = '$baseUrl/admin-feedback/get-all';
+  static const String updateFeedback = '$baseUrl/admin-feedback/update-by';
+  static const String deleteFeedback = '$baseUrl/admin-feedback/delete-by';
 }

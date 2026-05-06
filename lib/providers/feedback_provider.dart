@@ -3,6 +3,6 @@ import '../notifiers/feedback_notifier.dart';
 import '../models/feedback.dart';
 
 final feedbackProvider =
-    StateNotifierProvider<FeedbackNotifier, List<FeedbackItem>>((ref) {
-      return FeedbackNotifier();
-    });
+    StateNotifierProvider<FeedbackNotifier, FeedbackState>((ref) {
+  return FeedbackNotifier();
+});

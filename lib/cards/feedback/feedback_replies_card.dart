@@ -36,18 +36,24 @@ class FeedbackRepliesCard extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('You', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-                        Text(DateFormat('MMM dd, yyyy').format(item.createdAt), style: const TextStyle(color: AppColors.darkGrey, fontSize: 12)),
+                        const Text('You',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w700, fontSize: 16)),
+                        Text(DateFormat('MMM dd, yyyy').format(item.createdAt),
+                            style: const TextStyle(
+                                color: AppColors.darkGrey, fontSize: 12)),
                       ],
                     ),
                     AppGaps.smallV,
-                    Text(item.message, style: const TextStyle(color: AppColors.black, height: 1.5)),
+                    Text(item.feedbackMessage,
+                        style: const TextStyle(
+                            color: AppColors.black, height: 1.5)),
                   ],
                 ),
               ),
             ],
           ),
-          if (item.replyMessage != null) ...[
+          if (item.feedbackReply != null && item.feedbackReply!.isNotEmpty) ...[
             AppGaps.largeV,
             const Divider(color: AppColors.lightGrey),
             AppGaps.largeV,
@@ -66,9 +72,14 @@ class FeedbackRepliesCard extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Naiyo24', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppColors.black)),
-                          if (item.repliedAt != null)
-                            Text(DateFormat('MMM dd, yyyy').format(item.repliedAt!), style: const TextStyle(color: AppColors.darkGrey, fontSize: 12)),
+                          const Text('Admin Reply',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 16,
+                                  color: AppColors.black)),
+                          Text(DateFormat('MMM dd, yyyy').format(item.updatedAt),
+                              style: const TextStyle(
+                                  color: AppColors.darkGrey, fontSize: 12)),
                         ],
                       ),
                       AppGaps.smallV,
@@ -76,9 +87,12 @@ class FeedbackRepliesCard extends StatelessWidget {
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(16).copyWith(topLeft: const Radius.circular(0)),
+                          borderRadius: BorderRadius.circular(16)
+                              .copyWith(topLeft: const Radius.circular(0)),
                         ),
-                        child: Text(item.replyMessage!, style: const TextStyle(color: AppColors.darkGrey, height: 1.5)),
+                        child: Text(item.feedbackReply!,
+                            style: const TextStyle(
+                                color: AppColors.darkGrey, height: 1.5)),
                       ),
                     ],
                   ),

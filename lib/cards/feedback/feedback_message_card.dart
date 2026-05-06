@@ -3,28 +3,39 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconsax/iconsax.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/feedback_provider.dart';
+import '../../providers/auth_provider.dart';
 
 class FeedbackMessageCard extends ConsumerStatefulWidget {
   const FeedbackMessageCard({super.key});
 
   @override
-  ConsumerState<FeedbackMessageCard> createState() => _FeedbackMessageCardState();
+  ConsumerState<FeedbackMessageCard> createState() =>
+      _FeedbackMessageCardState();
 }
 
 class _FeedbackMessageCardState extends ConsumerState<FeedbackMessageCard> {
   final TextEditingController _controller = TextEditingController();
 
-  void _submit() {
+  Future<void> _submit() async {
     final text = _controller.text.trim();
     if (text.isNotEmpty) {
-      ref.read(feedbackProvider.notifier).submitFeedback(text);
-      _controller.clear();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Feedback submitted successfully!'),
-          backgroundColor: AppColors.black,
-        ),
-      );
+      final authState = ref.read(authProvider);
+      final adminId = authState.value?.adminId;
+
+      if (adminId != null) {
+        final success = await ref
+            .read(feedbackProvider.notifier)
+            .submitFeedback(adminId, text);
+        if (success && mounted) {
+          _controller.clear();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Feedback submitted successfully!'),
+              backgroundColor: AppColors.black,
+            ),
+          );
+        }
+      }
     }
   }
 
@@ -78,22 +89,36 @@ class _FeedbackMessageCardState extends ConsumerState<FeedbackMessageCard> {
           AppGaps.largeV,
           Align(
             alignment: Alignment.centerRight,
-            child: ElevatedButton(
-              onPressed: _submit,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.black,
-                foregroundColor: AppColors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Iconsax.send_1, size: 18),
-                  SizedBox(width: 8),
-                  Text('Submit Feedback', style: TextStyle(fontWeight: FontWeight.w600)),
-                ],
-              ),
+            child: Consumer(
+              builder: (context, ref, child) {
+                final isLoading = ref.watch(feedbackProvider).isLoading;
+                return ElevatedButton(
+                  onPressed: isLoading ? null : _submit,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.black,
+                    foregroundColor: AppColors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  child: isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: AppColors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Iconsax.send_1, size: 18),
+                            SizedBox(width: 8),
+                            Text('Submit Feedback', style: TextStyle(fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                );
+              },
             ),
           ),
         ],
