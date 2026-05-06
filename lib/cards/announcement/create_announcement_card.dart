@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/announcement_provider.dart';
+import '../../providers/auth_provider.dart';
 
 class CreateAnnouncementCard extends ConsumerStatefulWidget {
   const CreateAnnouncementCard({super.key});
@@ -15,20 +16,31 @@ class _CreateAnnouncementCardState extends ConsumerState<CreateAnnouncementCard>
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
-  void _submit() {
+  void _submit() async {
     final title = _titleController.text.trim();
     final description = _descriptionController.text.trim();
+    final authState = ref.read(authProvider);
+    final adminId = authState.value?.adminId;
+
+    if (adminId == null) return;
 
     if (title.isNotEmpty && description.isNotEmpty) {
-      ref.read(announcementProvider.notifier).addAnnouncement(title, description);
-      context.pop();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill out all fields.'),
-          backgroundColor: AppColors.error,
-        ),
+      final success = await ref.read(announcementProvider.notifier).addAnnouncement(
+        adminId: adminId,
+        title: title,
+        description: description,
       );
+      
+      if (success) {
+        if (!mounted) return;
+        AppTheme.showPremiumSnackBar(context: context, message: 'Announcement published!');
+        context.pop();
+      } else {
+        if (!mounted) return;
+        AppTheme.showPremiumSnackBar(context: context, message: 'Failed to publish announcement.', isError: true);
+      }
+    } else {
+      AppTheme.showPremiumSnackBar(context: context, message: 'Please fill out all fields.', isError: true);
     }
   }
 
@@ -41,6 +53,8 @@ class _CreateAnnouncementCardState extends ConsumerState<CreateAnnouncementCard>
 
   @override
   Widget build(BuildContext context) {
+    final isLoading = ref.watch(announcementProvider).isLoading;
+
     return Container(
       padding: EdgeInsets.only(
         left: 24,
@@ -86,14 +100,16 @@ class _CreateAnnouncementCardState extends ConsumerState<CreateAnnouncementCard>
           ),
           AppGaps.extraLargeV,
           ElevatedButton(
-            onPressed: _submit,
+            onPressed: isLoading ? null : _submit,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.black,
               foregroundColor: AppColors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             ),
-            child: const Text('Publish Announcement', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+            child: isLoading 
+              ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: AppColors.white, strokeWidth: 2))
+              : const Text('Publish Announcement', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
           ),
         ],
       ),

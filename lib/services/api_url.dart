@@ -25,8 +25,16 @@ class ApiUrl {
 
   // Employee Endpoints
   static const String createEmployee = '$baseUrl/employee-users/create';
+  static const String loginEmployee = '$baseUrl/employee-users/login';
   static const String getAllEmployees = '$baseUrl/employee-users/all';
   static const String getEmployeeById = '$baseUrl/employee-users';
   static const String updateEmployee = '$baseUrl/employee-users/update';
   static const String deleteEmployee = '$baseUrl/employee-users/delete';
+
+  // Announcement Endpoints
+  static const String createAnnouncement = '$baseUrl/announcements/create';
+  static const String getAllAnnouncements =
+      '$baseUrl/announcements/get-all-by-admin';
+  static const String updateAnnouncement = '$baseUrl/announcements/update-by';
+  static const String deleteAnnouncement = '$baseUrl/announcements/delete-by';
 }
