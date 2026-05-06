@@ -1,17 +1,53 @@
 class GiftItem {
-  final String id;
-  final String name;
-  final String imageUrl;
-  final String description;
-  final int stockCount;
+  final String giftId;
+  final String adminId;
+  final String giftItemName;
+  final String giftItemDescription;
+  final String status;
+  final double price;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
   const GiftItem({
-    required this.id,
-    required this.name,
-    required this.imageUrl,
-    required this.description,
-    required this.stockCount,
+    required this.giftId,
+    required this.adminId,
+    required this.giftItemName,
+    required this.giftItemDescription,
+    required this.status,
+    required this.price,
+    required this.createdAt,
+    required this.updatedAt,
   });
+
+  factory GiftItem.fromJson(Map<String, dynamic> json) {
+    return GiftItem(
+      giftId: json['gift_id'] ?? '',
+      adminId: json['admin_id'] ?? '',
+      giftItemName: json['gift_item_name'] ?? '',
+      giftItemDescription: json['gift_item_description'] ?? '',
+      status: json['status'] ?? 'active',
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : DateTime.now(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'gift_id': giftId,
+      'admin_id': adminId,
+      'gift_item_name': giftItemName,
+      'gift_item_description': giftItemDescription,
+      'status': status,
+      'price': price,
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
+    };
+  }
 }
 
 class GiftRequest {

@@ -37,4 +37,10 @@ class ApiUrl {
       '$baseUrl/announcements/get-all-by-admin';
   static const String updateAnnouncement = '$baseUrl/announcements/update-by';
   static const String deleteAnnouncement = '$baseUrl/announcements/delete-by';
+
+  // Gift Inventory Endpoints
+  static const String createGift = '$baseUrl/gift-inventory/create';
+  static const String getAllGifts = '$baseUrl/gift-inventory/all';
+  static const String updateGift = '$baseUrl/gift-inventory/update';
+  static const String deleteGift = '$baseUrl/gift-inventory/delete';
 }

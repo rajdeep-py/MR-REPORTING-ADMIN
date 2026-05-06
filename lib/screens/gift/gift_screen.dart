@@ -20,12 +20,24 @@ class GiftScreen extends ConsumerWidget {
       if (state.filterStatus != 'All' && req.status != state.filterStatus) {
         return false;
       }
-      
+
       if (state.dateRange != null) {
-        final rDate = DateTime(req.requestedOn.year, req.requestedOn.month, req.requestedOn.day);
-        final startDate = DateTime(state.dateRange!.start.year, state.dateRange!.start.month, state.dateRange!.start.day);
-        final endDate = DateTime(state.dateRange!.end.year, state.dateRange!.end.month, state.dateRange!.end.day);
-        
+        final rDate = DateTime(
+          req.requestedOn.year,
+          req.requestedOn.month,
+          req.requestedOn.day,
+        );
+        final startDate = DateTime(
+          state.dateRange!.start.year,
+          state.dateRange!.start.month,
+          state.dateRange!.start.day,
+        );
+        final endDate = DateTime(
+          state.dateRange!.end.year,
+          state.dateRange!.end.month,
+          state.dateRange!.end.day,
+        );
+
         if (rDate.isBefore(startDate) || rDate.isAfter(endDate)) {
           return false;
         }
@@ -49,20 +61,20 @@ class GiftScreen extends ConsumerWidget {
       body: Padding(
         padding: const EdgeInsets.all(AppGaps.screenPadding),
         child: Column(
-          children: [
-            const GiftFilterCard(),
-            AppGaps.largeV,
-            Expanded(
-              child: filteredRequests.isEmpty
-                  ? const Center(child: Text('No gift requests found.', style: TextStyle(color: AppColors.darkGrey)))
-                  : ListView.builder(
-                      itemCount: filteredRequests.length,
-                      itemBuilder: (context, index) {
-                        return GiftRequestCard(request: filteredRequests[index]);
-                      },
-                    ),
-            ),
-          ],
+          //children: [
+          //   const GiftFilterCard(),
+          //   AppGaps.largeV,
+          //   Expanded(
+          //     child: filteredRequests.isEmpty
+          //         ? const Center(child: Text('No gift requests found.', style: TextStyle(color: AppColors.darkGrey)))
+          //         : ListView.builder(
+          //             itemCount: filteredRequests.length,
+          //             itemBuilder: (context, index) {
+          //               return GiftRequestCard(request: filteredRequests[index]);
+          //             },
+          //           ),
+          //   ),
+          // ],
         ),
       ),
     );

@@ -2,32 +2,48 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
-import 'dart:math';
+import '../../models/gift.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_bar.dart';
 import '../../providers/gift_provider.dart';
-import '../../models/gift.dart';
+import '../../providers/auth_provider.dart';
 import '../../cards/gift/gift_card.dart';
 
 class GiftInventoryScreen extends ConsumerStatefulWidget {
   const GiftInventoryScreen({super.key});
 
   @override
-  ConsumerState<GiftInventoryScreen> createState() => _GiftInventoryScreenState();
+  ConsumerState<GiftInventoryScreen> createState() =>
+      _GiftInventoryScreenState();
 }
 
 class _GiftInventoryScreenState extends ConsumerState<GiftInventoryScreen> {
-  void _showAddGiftModal() {
-    final nameCtrl = TextEditingController();
-    final descCtrl = TextEditingController();
-    final imageCtrl = TextEditingController();
-    final stockCtrl = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authState = ref.read(authProvider);
+      authState.whenData((admin) {
+        if (admin != null) {
+          ref.read(giftProvider.notifier).fetchGifts(admin.adminId);
+        }
+      });
+    });
+  }
+
+  void _showGiftModal({GiftItem? gift}) {
+    final nameCtrl = TextEditingController(text: gift?.giftItemName);
+    final descCtrl = TextEditingController(text: gift?.giftItemDescription);
+    final priceCtrl = TextEditingController(text: gift?.price.toString());
+    final statusCtrl = TextEditingController(text: gift?.status ?? 'active');
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (context) {
         return Padding(
           padding: EdgeInsets.only(
@@ -40,7 +56,13 @@ class _GiftInventoryScreenState extends ConsumerState<GiftInventoryScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Add New Gift', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+              Text(
+                gift == null ? 'Add New Gift' : 'Edit Gift',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
               AppGaps.largeV,
               TextField(
                 controller: nameCtrl,
@@ -48,7 +70,10 @@ class _GiftInventoryScreenState extends ConsumerState<GiftInventoryScreen> {
                   labelText: 'Gift Name',
                   filled: true,
                   fillColor: AppColors.background,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
               AppGaps.mediumV,
@@ -58,58 +83,115 @@ class _GiftInventoryScreenState extends ConsumerState<GiftInventoryScreen> {
                   labelText: 'Description',
                   filled: true,
                   fillColor: AppColors.background,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
               AppGaps.mediumV,
               TextField(
-                controller: imageCtrl,
-                decoration: InputDecoration(
-                  labelText: 'Image URL',
-                  filled: true,
-                  fillColor: AppColors.background,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                ),
-              ),
-              AppGaps.mediumV,
-              TextField(
-                controller: stockCtrl,
+                controller: priceCtrl,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                  labelText: 'Initial Stock',
+                  labelText: 'Price',
                   filled: true,
                   fillColor: AppColors.background,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              AppGaps.mediumV,
+              TextField(
+                controller: statusCtrl,
+                decoration: InputDecoration(
+                  labelText: 'Status (active/inactive)',
+                  filled: true,
+                  fillColor: AppColors.background,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
               AppGaps.extraLargeV,
               SizedBox(
                 width: double.infinity,
                 height: 56,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.black,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
-                  onPressed: () {
-                    final name = nameCtrl.text.trim();
-                    final desc = descCtrl.text.trim();
-                    final img = imageCtrl.text.trim().isEmpty ? 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=400&q=80' : imageCtrl.text.trim();
-                    final stock = int.tryParse(stockCtrl.text.trim()) ?? 0;
+                child: Consumer(
+                  builder: (context, ref, child) {
+                    final isLoading = ref.watch(giftProvider).isLoading;
+                    return ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      onPressed: isLoading
+                          ? null
+                          : () async {
+                              final name = nameCtrl.text.trim();
+                              final desc = descCtrl.text.trim();
+                              final price =
+                                  double.tryParse(priceCtrl.text.trim()) ?? 0.0;
+                              final status = statusCtrl.text.trim();
 
-                    if (name.isNotEmpty) {
-                      final newGift = GiftItem(
-                        id: 'G-${Random().nextInt(9999) + 1000}',
-                        name: name,
-                        description: desc,
-                        imageUrl: img,
-                        stockCount: stock,
-                      );
-                      ref.read(giftProvider.notifier).addGiftItem(newGift);
-                      Navigator.pop(context);
-                    }
+                              final authState = ref.read(authProvider);
+                              final adminId = authState.value?.adminId;
+
+                              if (name.isNotEmpty && adminId != null) {
+                                bool success;
+                                if (gift == null) {
+                                  success = await ref
+                                      .read(giftProvider.notifier)
+                                      .addGiftItem({
+                                        'admin_id': adminId,
+                                        'gift_item_name': name,
+                                        'gift_item_description': desc,
+                                        'price': price,
+                                        'status': status,
+                                      });
+                                } else {
+                                  success = await ref
+                                      .read(giftProvider.notifier)
+                                      .updateGiftItem(gift.giftId, {
+                                        'gift_item_name': name,
+                                        'gift_item_description': desc,
+                                        'price': price,
+                                        'status': status,
+                                      });
+                                }
+                                if (success && mounted) {
+                                  Navigator.pop(context);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        gift == null
+                                            ? 'Gift added successfully'
+                                            : 'Gift updated successfully',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                      child: isLoading
+                          ? const CircularProgressIndicator(
+                              color: AppColors.white,
+                            )
+                          : Text(
+                              gift == null ? 'Add to Inventory' : 'Update Gift',
+                              style: const TextStyle(
+                                color: AppColors.white,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
+                              ),
+                            ),
+                    );
                   },
-                  child: const Text('Add to Inventory', style: TextStyle(color: AppColors.white, fontWeight: FontWeight.w700, fontSize: 16)),
                 ),
               ),
               AppGaps.largeV,
@@ -132,22 +214,44 @@ class _GiftInventoryScreenState extends ConsumerState<GiftInventoryScreen> {
         showBackButton: true,
         onMenuTap: () => context.pop(),
         actions: [
-          PremiumAppbarAction(
-            icon: Iconsax.add,
-            onTap: _showAddGiftModal,
-          ),
+          PremiumAppbarAction(icon: Iconsax.add, onTap: () => _showGiftModal()),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(AppGaps.screenPadding),
-        child: state.inventory.isEmpty
-            ? const Center(child: Text('Inventory is empty.', style: TextStyle(color: AppColors.darkGrey)))
-            : ListView.builder(
-                itemCount: state.inventory.length,
-                itemBuilder: (context, index) {
-                  return GiftCard(item: state.inventory[index]);
-                },
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(AppGaps.screenPadding),
+            child: state.inventory.isEmpty && !state.isLoading
+                ? const Center(
+                    child: Text(
+                      'Inventory is empty.',
+                      style: TextStyle(color: AppColors.darkGrey),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: state.inventory.length,
+                    itemBuilder: (context, index) {
+                      return GiftCard(
+                        item: state.inventory[index],
+                        onEdit: () =>
+                            _showGiftModal(gift: state.inventory[index]),
+                      );
+                    },
+                  ),
+          ),
+          if (state.isLoading) const Center(child: CircularProgressIndicator()),
+          if (state.errorMessage != null)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Text(
+                  'Error: ${state.errorMessage}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: AppColors.error),
+                ),
               ),
+            ),
+        ],
       ),
     );
   }
